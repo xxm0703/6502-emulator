@@ -1,40 +1,43 @@
 #include"6502.h"
+#include<stdlib.h>
 
+inline uint16_t ind(uint16_t add) return get(abs(add));
+inline uint16_t indx(uint8_t zpg) return abs(read(zpg) + comp.cpu->X);
+inline uint16_t indy(uint8_t zpg) return abs(read(zpg)) + comp,cpu->Y;
 
-inline uint16_t *ind(uint16_t *add) return abs(comp.mem[abs(*add)]);
-inline uint16_t *indx(uint8_t *zpg) return comp.mem[*zpg + comp.cpu->X << 8 | *zpg + comp.cpu->X + 1];
-inline uint16_t *indy(uint8_t *zpg) return comp.mem[*zpg << 8 | *zpg + 1] + comp.cpu->Y;
+inline uint16_t zpg(uint8_t zpg) return read(zpg);
+inline uint16_t zpgx(uint8_t zpg) return read(zpg) + comp.cpu->X;
+inline uint16_t zpgy(uint8_t zpg) return read(zpg) + comp.cpu->Y;
 
-inline uint16_t *zpg(uint8_t *zpg) return *zpg;
-inline uint16_t *zpgx(uint8_t *zpg) return *zpg + comp.cpu->X;
-inline uint16_t *zpgy(uint8_t *zpg) return *zpg + comp.cpu->Y;
-
-inline uint16_t *abs(int16_t *add) return *abs >> 8 | *abs << 8;
-inline uint16_t *absx(uint16_t *abs) return *(abs(abs)) + comp.cpu->X;
-inline uint16_t *absy(uint16_t *abs) return *(abs(abs)) + comp.cpu->Y;
+inline uint16_t abs(int16_t abs) return read(abs) | read(abs+1) << 8;
+inline uint16_t absx(uint16_t abs) return abs(abs) + comp.cpu->X;
+inline uint16_t absy(uint16_t abs) return abs(abs) + comp.cpu->Y;
 
 inline uint16_t get(uint16_t abs) return comp.mem[abs];
-inline uint16_t rel(int8_t *ofs, uint8_t *inp) return inp + *ofs;
+inline uint16_t rel(uint8_t *inp) return inp + read(*inp + 1);
+inline uint8_t read(uint16_t pc) return comp.ins[pc];
 
 machine_t comp;
 
 int main(){
   comp.mem = (int8_t *)malloc(64 * 1024 * sizeof(int8_t));
+  comp.ins = (int8_t *)malloc(64 * 1024 * sizeof(int8_t));
   comp.cpu = (cpu_t *)malloc(sizeof(cpu_t));
   // run(&comp)
   return 0;
 }
 
-int run(uint8_t *inp){
+int run(){
   int8_t *mem = comp.mem;
   cpu_t *cpu = comp.cpu;
+  uint16_t inp = cpu->PC;
   union{
     int8_t as_8;
     int16_t as_16
   } p;
   for(;;){
 
-    switch(*inp){
+    switch(read(inp)){
 
       // BRK
       case 0x0:
@@ -50,7 +53,7 @@ int run(uint8_t *inp){
       break;
 
       case 0x5:
-        comp->cpu->acc = zpg(inp + 1) | comp->cpu->acc;
+        cpu->acc = zpg(inp + 1) | comp->cpu->acc;
         inp += 2;
         cpu->acc ? cpu->flags &= ~Z : cpu->flags |= Z;
         cpu->acc >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
@@ -66,12 +69,15 @@ int run(uint8_t *inp){
       inp += 2;
       break;
 
+      // PHP
       case 0x8:
-
+      cpu->flags |= B;
+      mem[cpu->SP--] = cpu->flags;
       break;
+
       // ORA
       case 0x9:
-      comp->cpu->acc = *(inp + 1) | comp->cpu->acc;
+      cpu->acc = *(inp + 1) | cpu->acc;
       inp += 2;
       cpu->acc ? cpu->flags &= ~Z : cpu->flags |= Z;
       cpu->acc >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
@@ -88,7 +94,7 @@ int run(uint8_t *inp){
 
       // ORA
       case 0xD:
-      comp->cpu->acc = get(abs(inp + 1)) | comp->cpu->acc;
+      cpu->acc = get(abs(inp + 1)) | cpu->acc;
       inp += 3;
       cpu->acc ? cpu->flags &= ~Z : cpu->flags |= Z;
       cpu->acc >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
@@ -105,12 +111,12 @@ int run(uint8_t *inp){
       break;
 
       case 0x10:
-
+      rel(inp+1, inp);
       break;
 
       // ORA
       case 0x11:
-      comp->cpu->acc = get(indy(inp + 1)) | comp->cpu->acc;
+      cpu->acc = get(indy(inp + 1)) | cpu->acc;
       inp += 2;
       cpu->acc ? cpu->flags &= ~Z : cpu->flags |= Z;
       cpu->acc >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
@@ -133,8 +139,10 @@ int run(uint8_t *inp){
       inp += 2;
       break;
 
+      // CLC
       case 0x18:
-
+      cpu->flags &= ~C;
+      inp++
       break;
 
       // ORA
@@ -152,6 +160,7 @@ int run(uint8_t *inp){
       cpu->acc >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
       break;
 
+      // ASL
       case 0x1E:
       *p.as_16 = get(absx(inp + 1));
       *p.as_16 <<= 1;
@@ -161,8 +170,9 @@ int run(uint8_t *inp){
       inp += 3;
       break;
 
+      // JSR
       case 0x20:
-
+      mem[cpu->SP++] =
       break;
 
       case 0x21:
