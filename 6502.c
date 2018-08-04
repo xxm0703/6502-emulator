@@ -473,27 +473,56 @@ int run(){
       inp = get(1 << 8 | cpu->SP++) << 8 | get(1 << 8 | cpu->SP++);
       break;
 
+      // ADC
       case 0x61:
-
+      p = ((uint16_t)(cpu->acc) + get(indx(inp + 1)) + cpu->flags & C) >> 8;
+      cpu->acc = (uint16_t)(cpu->acc) + get(indx(inp + 1)) + cpu->flags & C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      inp += 2;
       break;
 
       case 0x65:
-
+      p = ((uint16_t)(cpu->acc) + get(zpg(inp + 1)) + cpu->flags & C) >> 8;
+      cpu->acc = (uint16_t)(cpu->acc) + get(zpg(inp + 1)) + cpu->flags & C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      inp += 2;
       break;
 
+      // ROR
       case 0x66:
-
+      p = get(zpg(inp + 1)) & 1;
+      mem[zpg(inp + 1)] = mem[zpg(inp + 1)] >> 1 | (cpu->flags << 7);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      inp += 2;
       break;
 
       case 0x68:
 
       break;
 
+      // ADC
       case 0x69:
-
+      p = ((uint16_t)(cpu->acc) + read(inp + 1) + cpu->flags & C) >> 8;
+      cpu->acc = (uint16_t)(cpu->acc) + read(inp + 1) + cpu->flags & C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      inp += 2;
       break;
 
       case 0x6A:
+      p = cpu->acc & 1;
+      cpu->acc = cpu->acc >> 1 | (cpu->flags << 7);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      inp += 1;
 
       break;
 
@@ -502,44 +531,90 @@ int run(){
       inp = ind(inp + 1);
       break;
 
+      // ADC
       case 0x6D:
-
+      p = ((uint16_t)(cpu->acc) + get(abs(inp + 1)) + cpu->flags & C) >> 8;
+      cpu->acc = (uint16_t)(cpu->acc) + get(abs(inp + 1)) + cpu->flags & C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      inp += 3;
       break;
 
+      // ROR
       case 0x6E:
-
+      p = get(abs(inp + 1)) & 1;
+      mem[abs(inp + 1)] = mem[abs(inp + 1)] >> 1 | (cpu->flags << 7);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      inp += 3;
       break;
 
       case 0x70:
 
       break;
 
+      // ADC
       case 0x71:
-
+      p = ((uint16_t)(cpu->acc) + get(indy(inp + 1)) + cpu->flags & C) >> 8;
+      cpu->acc = (uint16_t)(cpu->acc) + get(indy(inp + 1)) + cpu->flags & C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      inp += 2;
       break;
 
       case 0x75:
-
+      p = ((uint16_t)(cpu->acc) + get(zpgx(inp + 1)) + cpu->flags & C) >> 8;
+      cpu->acc = (uint16_t)(cpu->acc) + get(zpgx(inp + 1)) + cpu->flags & C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      inp += 2;
       break;
 
+      // ROR
       case 0x76:
-
+      p = get(zpgx(inp + 1)) & 1;
+      mem[zpgx(inp + 1)] = mem[zpgx(inp + 1)] >> 1 | (cpu->flags << 7);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      inp += 2;
       break;
 
       case 0x78:
 
       break;
 
+      // ADC
       case 0x79:
-
+      p = ((uint16_t)(cpu->acc) + get(absy(inp + 1)) + cpu->flags & C) >> 8;
+      cpu->acc = (uint16_t)(cpu->acc) + get(absy(inp + 1)) + cpu->flags & C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      inp += 3;
       break;
 
       case 0x7D:
-
+      p = ((uint16_t)(cpu->acc) + get(absx(inp + 1)) + cpu->flags & C) >> 8;
+      cpu->acc = (uint16_t)(cpu->acc) + get(absx(inp + 1)) + cpu->flags & C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      inp += 3;
       break;
 
+      // ROR
       case 0x7E:
-
+      p = get(absx(inp + 1)) & 1;
+      mem[absx(inp + 1)] = mem[absx(inp + 1)] >> 1 | (cpu->flags << 7);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      inp += 3;
       break;
 
       case 0x81:
