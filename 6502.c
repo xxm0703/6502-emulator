@@ -1,21 +1,22 @@
 #include"6502.h"
 #include<stdlib.h>
 
-inline uint16_t ind(uint16_t add) return get(abs(add));
-inline uint16_t indx(uint8_t zpg) return abs(read(zpg) + comp.cpu->X);
-inline uint16_t indy(uint8_t zpg) return abs(read(zpg)) + comp,cpu->Y;
+inline uint16_t ind(uint16_t add) return norm(comp.mem, norm(comp.ins, add));
+inline uint16_t indx(uint8_t zpg) return norm(comp.mem, read(zpg) + comp.cpu->X);
+inline uint16_t indy(uint8_t zpg) return norm(comp.mem, read(zpg)) + comp,cpu->Y;
 
 inline uint16_t zpg(uint8_t zpg) return read(zpg);
-inline uint16_t zpgx(uint8_t zpg) return read(zpg) + comp.cpu->X;
-inline uint16_t zpgy(uint8_t zpg) return read(zpg) + comp.cpu->Y;
+inline uint16_t zpgx(uint8_t zpg) return zpg(zpg) + comp.cpu->X;
+inline uint16_t zpgy(uint8_t zpg) return zpg(zpg) + comp.cpu->Y;
 
-inline uint16_t abs(int16_t abs) return read(abs) | read(abs+1) << 8;
+inline uint16_t abs(int16_t abs) return norm(comp.ins, abs);
 inline uint16_t absx(uint16_t abs) return abs(abs) + comp.cpu->X;
 inline uint16_t absy(uint16_t abs) return abs(abs) + comp.cpu->Y;
 
 inline uint8_t get(uint16_t abs) return comp.mem[abs];
 inline uint16_t rel(uint8_t inp) return inp + read(inp + 1);
 inline uint8_t read(uint16_t pc) return comp.ins[pc];
+inline uint8_t norm(uint8_t *src, uint16_t inx) return src[inx] | src[inx+1] << 8;
 
 machine_t comp;
 
@@ -50,7 +51,7 @@ int run(){
       break;
 
       case 0x5:
-        cpu->acc = zpg(inp + 1) | cpu->acc;
+        cpu->acc = get(zpg(inp + 1)) | cpu->acc;
         inp += 2;
         zero(cpu->acc);
         nega(p);
@@ -70,7 +71,7 @@ int run(){
       // PHP
       case 0x8:
       cpu->flags |= B;
-      mem[cpu->SP--] = cpu->flags;
+      mem[1 << 8 | cpu->SP--] = cpu->flags;
       inp++;
       break;
 
@@ -175,8 +176,8 @@ int run(){
 
       // JSR
       case 0x20:
-      mem[cpu->SP--] = (inp+2) >> 8;
-      mem[cpu->SP--] = (inp+2) & 0xFF;
+      mem[1 << 8 | cpu->SP--] = (inp+2) >> 8;
+      mem[1 << 8 | cpu->SP--] = (inp+2) & 0xFF;
       inp = abs(inp+1);
       break;
 
@@ -216,7 +217,7 @@ int run(){
       break;
 
       case 0x28:
-      cpu->flags = mem[cpu->SP++];
+      cpu->flags = mem[1 << 8 | cpu->SP++];
       inp++;
       break;
 
@@ -325,16 +326,26 @@ int run(){
       inp += 3;
       break;
 
+      // RTI
       case 0x40:
-
+      cpu->flags = get(1 << 8 | cpu->SP++);
+      inp = get(1 << 8 | cpu->SP++) << 8 | get(1 << 8 | cpu->SP++);
+      inp++;
       break;
 
+      // EOR
       case 0x41:
-
+      cpu->acc = get(indx(inp + 1)) ^ cpu->acc;
+      inp += 2;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       case 0x45:
-
+      cpu->acc = get(zpg(inp + 1)) & cpu->acc;
+      inp += 2;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       case 0x46:
@@ -345,8 +356,12 @@ int run(){
 
       break;
 
+      // EOR
       case 0x49:
-
+      cpu->acc = get(read(inp + 1)) & cpu->acc;
+      inp += 2;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       case 0x4A:
@@ -357,8 +372,12 @@ int run(){
 
       break;
 
+      // EOR
       case 0x4D:
-
+      cpu->acc = get(abs(inp + 1)) & cpu->acc;
+      inp += 3;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       case 0x4E:
@@ -369,12 +388,19 @@ int run(){
 
       break;
 
+      // EOR
       case 0x51:
-
+      cpu->acc = get(indy(inp + 1)) & cpu->acc;
+      inp += 2;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       case 0x55:
-
+      cpu->acc = get(zpgx(inp + 1)) & cpu->acc;
+      inp += 2;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       case 0x56:
@@ -385,12 +411,19 @@ int run(){
 
       break;
 
+      // EOR
       case 0x59:
-
+      cpu->acc = get(absy(inp + 1)) & cpu->acc;
+      inp += 3;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       case 0x5D:
-
+      cpu->acc = get(absx(inp + 1)) & cpu->acc;
+      inp += 3;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       case 0x5E:
