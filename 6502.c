@@ -382,8 +382,9 @@ int run(){
       inp++;
       break;
 
+      // JMP
       case 0x4C:
-
+      inp = abs(inp + 1);
       break;
 
       // EOR
@@ -405,8 +406,9 @@ int run(){
       inp += 3;
       break;
 
+      // BVC
       case 0x50:
-
+      inp = cpu->flags & V ? inp + 2 : rel(inp);
       break;
 
       // EOR
@@ -427,7 +429,7 @@ int run(){
       // LSR
       case 0x56:
       p = get(zpgx(inp + 1));
-      cpu->flags |= (p & 1);
+      cpu->flags |= (p & C);
       p >>= 1;
       zero(p);
       nega(p);
@@ -493,8 +495,9 @@ int run(){
 
       break;
 
+      // JMP
       case 0x6C:
-
+      inp = ind(inp + 1);
       break;
 
       case 0x6D:
