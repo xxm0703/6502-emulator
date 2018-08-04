@@ -437,8 +437,9 @@ int run(){
       inp += 2;
       break;
 
+      // CLI
       case 0x58:
-
+      cpu->flags &= ~I;
       break;
 
       // EOR
@@ -467,8 +468,9 @@ int run(){
       inp += 3;
       break;
 
+      // RTS
       case 0x60:
-
+      inp = get(1 << 8 | cpu->SP++) << 8 | get(1 << 8 | cpu->SP++);
       break;
 
       case 0x61:
