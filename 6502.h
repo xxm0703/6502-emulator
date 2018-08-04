@@ -9,6 +9,8 @@
 #define V 64
 #define N 128
 
+#define zero(x) (x ? cpu->flags &= ~Z : cpu->flags |= Z)
+#define nega(x) (x >> 7 ? cpu->flags |= N : cpu->flags &= ~N)
 
 typedef struct{
   int8_t flags, acc, X, Y;

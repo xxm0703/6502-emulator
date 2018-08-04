@@ -13,15 +13,15 @@ inline uint16_t abs(int16_t abs) return read(abs) | read(abs+1) << 8;
 inline uint16_t absx(uint16_t abs) return abs(abs) + comp.cpu->X;
 inline uint16_t absy(uint16_t abs) return abs(abs) + comp.cpu->Y;
 
-inline uint16_t get(uint16_t abs) return comp.mem[abs];
-inline uint16_t rel(uint8_t *inp) return inp + read(*inp + 1);
+inline uint8_t get(uint16_t abs) return comp.mem[abs];
+inline uint16_t rel(uint8_t inp) return inp + read(inp + 1);
 inline uint8_t read(uint16_t pc) return comp.ins[pc];
 
 machine_t comp;
 
 int main(){
-  comp.mem = (int8_t *)malloc(64 * 1024 * sizeof(int8_t));
-  comp.ins = (int8_t *)malloc(64 * 1024 * sizeof(int8_t));
+  comp.mem = (uint8_t *)malloc(64 * 1024 * sizeof(int8_t));
+  comp.ins = (uint8_t *)malloc(64 * 1024 * sizeof(int8_t));
   comp.cpu = (cpu_t *)malloc(sizeof(cpu_t));
   // run(&comp)
   return 0;
@@ -31,10 +31,7 @@ int run(){
   int8_t *mem = comp.mem;
   cpu_t *cpu = comp.cpu;
   uint16_t inp = cpu->PC;
-  union{
-    int8_t as_8;
-    int16_t as_16
-  } p;
+  uint8_t p;
   for(;;){
 
     switch(read(inp)){
@@ -48,24 +45,25 @@ int run(){
       case 0x1:
         cpu->acc = get(indx(inp + 1)) | cpu->acc;
         inp += 2;
-        cpu->acc ? cpu->flags &= ~Z : cpu->flags |= Z;
-        cpu->acc >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
+        zero(cpu->acc);
+        nega(cpu->acc);
       break;
 
       case 0x5:
         cpu->acc = zpg(inp + 1) | comp->cpu->acc;
         inp += 2;
-        cpu->acc ? cpu->flags &= ~Z : cpu->flags |= Z;
-        cpu->acc >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
+        zero(cpu->acc);
+        nega(p);
       break;
 
       // ASL
       case 0x6:
-      *p.as_8 = get(zpg(inp + 1))
-      *p.as_8 <<= 1;
-      *p.as_8 ? cpu->flags &= ~Z : cpu->flags |= Z;
-      *p.as_8 >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
-      *p.as_8 >> 7 ? cpu->flags |= C : cpu->flags &= ~C;
+      p = get(zpg(inp + 1))
+      p >> 7 ? cpu->flags |= C : cpu->flags &= ~C;
+      p <<= 1;
+      zero(p);
+      nega(p);
+      mem[zpg(inp+1)] = p
       inp += 2;
       break;
 
@@ -73,22 +71,23 @@ int run(){
       case 0x8:
       cpu->flags |= B;
       mem[cpu->SP--] = cpu->flags;
+      inp++;
       break;
 
       // ORA
       case 0x9:
       cpu->acc = *(inp + 1) | cpu->acc;
       inp += 2;
-      cpu->acc ? cpu->flags &= ~Z : cpu->flags |= Z;
-      cpu->acc >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       // ASL
       case 0xA:
-      cpu->acc <<= 1;
-      cpu->acc ? cpu->flags &= ~Z : cpu->flags |= Z;
-      cpu->acc >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
       cpu->acc >> 7 ? cpu->flags |= C : cpu->flags &= ~C;
+      cpu->acc <<= 1;
+      zero(cpu->acc);
+      nega(cpu->acc);
       inp += 1;
       break;
 
@@ -96,123 +95,174 @@ int run(){
       case 0xD:
       cpu->acc = get(abs(inp + 1)) | cpu->acc;
       inp += 3;
-      cpu->acc ? cpu->flags &= ~Z : cpu->flags |= Z;
-      cpu->acc >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       // ASL
       case 0xE:
-      *p.as_16 = get(abs(inp + 1));
-      *p.as_16 <<= 1;
-      *p.as_16 ? cpu->flags &= ~Z : cpu->flags |= Z;
-      *p.as_16 >> 15 ? cpu->flags |= N : cpu->flags &= ~N;
-      *p.as_16 >> 15 ? cpu->flags |= C : cpu->flags &= ~C;
+      p = get(abs(inp + 1));
+      p >> 7 ? cpu->flags |= C : cpu->flags &= ~C;
+      p <<= 1;
+      zero(p);
+      nega(p);
+      mem[abs(inp + 1)] = p;
       inp += 3;
       break;
 
+      // BPL
       case 0x10:
-      rel(inp+1, inp);
+      inp = cpu->flags & N ? inp + 2 : rel(inp);
       break;
 
       // ORA
       case 0x11:
       cpu->acc = get(indy(inp + 1)) | cpu->acc;
       inp += 2;
-      cpu->acc ? cpu->flags &= ~Z : cpu->flags |= Z;
-      cpu->acc >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       case 0x15:
       comp->cpu->acc = get(zpgx(inp + 1)) | comp->cpu->acc;
       inp += 2;
-      cpu->acc ? cpu->flags &= ~Z : cpu->flags |= Z;
-      cpu->acc >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       // ASL
       case 0x16:
-      *p.as_8 = get(zpgx(inp+1))
-      *p.as_8 <<= 1;
-      *p.as_8 ? cpu->flags &= ~Z : cpu->flags |= Z;
-      *p.as_8 >> 15 ? cpu->flags |= N : cpu->flags &= ~N;
-      *p.as_8 >> 15 ? cpu->flags |= C : cpu->flags &= ~C;
+      p = get(zpgx(inp+1))
+      p >> 7 ? cpu->flags |= C : cpu->flags &= ~C;
+      p <<= 1;
+      zero(p);
+      nega(p);
+      mem[zpgx(inp+1)] = p
       inp += 2;
       break;
 
       // CLC
       case 0x18:
       cpu->flags &= ~C;
-      inp++
+      inp++;
       break;
 
       // ORA
       case 0x19:
-      comp->cpu->acc = get(absy(inp + 1)) | comp->cpu->acc;
+      cpu->acc = get(absy(inp + 1)) | comp->cpu->acc;
       inp += 3;
-      cpu->acc ? cpu->flags &= ~Z : cpu->flags |= Z;
-      cpu->acc >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       case 0x1D:
-      comp->cpu->acc = get(absx(inp + 1)) | comp->cpu->acc;
+      cpu->acc = get(absx(inp + 1)) | comp->cpu->acc;
       inp += 3;
-      cpu->acc ? cpu->flags &= ~Z : cpu->flags |= Z;
-      cpu->acc >> 7 ? cpu->flags |= N : cpu->flags &= ~N;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       // ASL
       case 0x1E:
-      *p.as_16 = get(absx(inp + 1));
-      *p.as_16 <<= 1;
-      *p.as_16 ? cpu->flags &= ~Z : cpu->flags |= Z;
-      *p.as_16 >> 15 ? cpu->flags |= N : cpu->flags &= ~N;
-      *p.as_16 >> 15 ? cpu->flags |= C : cpu->flags &= ~C;
+      p = get(absx(inp + 1));
+      p >> 7 ? cpu->flags |= C : cpu->flags &= ~C;
+      p <<= 1;
+      zero(p);
+      nega(p);
+      mem[absx(inp+1)] = p
       inp += 3;
       break;
 
       // JSR
       case 0x20:
-      mem[cpu->SP++] =
+      mem[cpu->SP--] = (inp+2) >> 8;
+      mem[cpu->SP--] = (inp+2) & 0xFF;
+      inp = abs(inp+1);
       break;
 
+      // AND
       case 0x21:
-
+      cpu->acc = get(indx(inp + 1)) & comp->cpu->acc;
+      inp += 2;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
+      // BIT
       case 0x24:
-
+      p = get(zpg(inp + 1));
+      nega(p);
+      p & 0x80 ? cpu->flags |= V : cpu->flags &= ~V
+      zero(cpu->acc & p);
+      inp += 2;
       break;
 
+      // AND
       case 0x25:
-
+      cpu->acc = get(zpg(inp + 1)) & comp->cpu->acc;
+      inp += 2;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
+      // ROL
       case 0x26:
-
+      p = get(zpg(inp + 1)) >> 7;
+      mem[zpg(inp + 1)] = mem[zpg(inp + 1)] << 1 | (cpu->flags & C);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      inp += 2;
       break;
 
       case 0x28:
-
+      cpu->flags = mem[cpu->SP++];
+      inp++;
       break;
 
+      // AND
       case 0x29:
-
+      cpu->acc = read(inp + 1) & comp->cpu->acc;
+      inp += 2;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
+      // ROL
       case 0x2A:
-
+      p = cpu->acc >> 7;
+      cpu->acc = cpu->acc << 1 | (cpu->flags & C);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      inp++;
       break;
 
+      // BIT
       case 0x2C:
-
+      p = get(abs(inp + 1));
+      nega(p);
+      p & 0x80 ? cpu->flags |= V : cpu->flags &= ~V
+      zero(cpu->acc & p);
+      inp += 3;
       break;
 
+      // AND
       case 0x2D:
-
+      cpu->acc = get(abs(inp + 1)) & comp->cpu->acc;
+      inp += 3;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
+      // ROL
       case 0x2E:
-
+      p = get(abs(inp + 1)) >> 7;
+      mem[abs(inp + 1)] = mem[abs(inp + 1)] << 1 | (cpu->flags & C);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      inp += 3;
       break;
 
       case 0x30:
@@ -223,28 +273,51 @@ int run(){
 
       break;
 
+      // AND
       case 0x35:
-
+      cpu->acc = get(zpgx(inp + 1)) & comp->cpu->acc;
+      inp += 2;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
+      // ROL
       case 0x36:
-
+      p = get(zpgx(inp + 1)) >> 7;
+      mem[zpgx(inp + 1)] = mem[zpgx(inp + 1)] << 1 | (cpu->flags & C);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      inp += 2;
       break;
 
       case 0x38:
 
       break;
 
+      // AND
       case 0x39:
-
+      cpu->acc = get(absy(inp + 1)) & comp->cpu->acc;
+      inp += 3;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
       case 0x3D:
-
+      cpu->acc = get(absx(inp + 1)) & comp->cpu->acc;
+      inp += 3;
+      zero(cpu->acc);
+      nega(cpu->acc);
       break;
 
+      // ROL
       case 0x3E:
-
+      p = get(absx(inp + 1)) >> 7;
+      mem[absx(inp + 1)] = mem[absx(inp + 1)] << 1 | (cpu->flags & C);
+      p ? cpu->flags |= C : cpu->flags &= ~C;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      inp += 3;
       break;
 
       case 0x40:
