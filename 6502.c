@@ -64,7 +64,7 @@ int run(){
       p <<= 1;
       zero(p);
       nega(p);
-      mem[zpg(inp+1)] = p
+      mem[zpg(inp+1)] = p;
       inp += 2;
       break;
 
@@ -138,7 +138,7 @@ int run(){
       p <<= 1;
       zero(p);
       nega(p);
-      mem[zpgx(inp+1)] = p
+      mem[zpgx(inp+1)] = p;
       inp += 2;
       break;
 
@@ -170,7 +170,7 @@ int run(){
       p <<= 1;
       zero(p);
       nega(p);
-      mem[absx(inp+1)] = p
+      mem[absx(inp+1)] = p;
       inp += 3;
       break;
 
@@ -193,7 +193,7 @@ int run(){
       case 0x24:
       p = get(zpg(inp + 1));
       nega(p);
-      p & 0x80 ? cpu->flags |= V : cpu->flags &= ~V
+      p & 0x80 ? cpu->flags |= V : cpu->flags &= ~V;
       zero(cpu->acc & p);
       inp += 2;
       break;
@@ -243,7 +243,7 @@ int run(){
       case 0x2C:
       p = get(abs(inp + 1));
       nega(p);
-      p & 0x80 ? cpu->flags |= V : cpu->flags &= ~V
+      p & 0x80 ? cpu->flags |= V : cpu->flags &= ~V;
       zero(cpu->acc & p);
       inp += 3;
       break;
@@ -348,12 +348,21 @@ int run(){
       nega(cpu->acc);
       break;
 
+      // LSR
       case 0x46:
-
+      p = get(zpg(inp + 1));
+      cpu->flags |= (p & 1);
+      p >>= 1;
+      zero(p);
+      nega(p);
+      mem[zpg(inp+1)] = p;
+      inp += 2;
       break;
 
+      // PHA
       case 0x48:
-
+      mem[cpu->SP--] = cpu->acc;
+      inp++;
       break;
 
       // EOR
@@ -364,8 +373,13 @@ int run(){
       nega(cpu->acc);
       break;
 
+      // LSR
       case 0x4A:
-
+      cpu->flags |= (cpu->acc & 1);
+      cpu->acc >>= 1;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      inp++;
       break;
 
       case 0x4C:
@@ -380,8 +394,15 @@ int run(){
       nega(cpu->acc);
       break;
 
+      // LSR
       case 0x4E:
-
+      p = get(abs(inp + 1));
+      cpu->flags |= (p & 1);
+      p >>= 1;
+      zero(p);
+      nega(p);
+      mem[abs(inp+1)] = p;
+      inp += 3;
       break;
 
       case 0x50:
@@ -403,8 +424,15 @@ int run(){
       nega(cpu->acc);
       break;
 
+      // LSR
       case 0x56:
-
+      p = get(zpgx(inp + 1));
+      cpu->flags |= (p & 1);
+      p >>= 1;
+      zero(p);
+      nega(p);
+      mem[zpgx(inp+1)] = p;
+      inp += 2;
       break;
 
       case 0x58:
@@ -426,8 +454,15 @@ int run(){
       nega(cpu->acc);
       break;
 
+      // LSR
       case 0x5E:
-
+      p = get(absx(inp + 1));
+      cpu->flags |= (p & 1);
+      p >>= 1;
+      zero(p);
+      nega(p);
+      mem[absx(inp+1)] = p;
+      inp += 3;
       break;
 
       case 0x60:
