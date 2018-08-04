@@ -50,7 +50,7 @@ int run(){
       break;
 
       case 0x5:
-        cpu->acc = zpg(inp + 1) | comp->cpu->acc;
+        cpu->acc = zpg(inp + 1) | cpu->acc;
         inp += 2;
         zero(cpu->acc);
         nega(p);
@@ -124,7 +124,7 @@ int run(){
       break;
 
       case 0x15:
-      comp->cpu->acc = get(zpgx(inp + 1)) | comp->cpu->acc;
+      cpu->acc = get(zpgx(inp + 1)) | cpu->acc;
       inp += 2;
       zero(cpu->acc);
       nega(cpu->acc);
@@ -149,14 +149,14 @@ int run(){
 
       // ORA
       case 0x19:
-      cpu->acc = get(absy(inp + 1)) | comp->cpu->acc;
+      cpu->acc = get(absy(inp + 1)) | cpu->acc;
       inp += 3;
       zero(cpu->acc);
       nega(cpu->acc);
       break;
 
       case 0x1D:
-      cpu->acc = get(absx(inp + 1)) | comp->cpu->acc;
+      cpu->acc = get(absx(inp + 1)) | cpu->acc;
       inp += 3;
       zero(cpu->acc);
       nega(cpu->acc);
@@ -182,7 +182,7 @@ int run(){
 
       // AND
       case 0x21:
-      cpu->acc = get(indx(inp + 1)) & comp->cpu->acc;
+      cpu->acc = get(indx(inp + 1)) & cpu->acc;
       inp += 2;
       zero(cpu->acc);
       nega(cpu->acc);
@@ -199,7 +199,7 @@ int run(){
 
       // AND
       case 0x25:
-      cpu->acc = get(zpg(inp + 1)) & comp->cpu->acc;
+      cpu->acc = get(zpg(inp + 1)) & cpu->acc;
       inp += 2;
       zero(cpu->acc);
       nega(cpu->acc);
@@ -222,7 +222,7 @@ int run(){
 
       // AND
       case 0x29:
-      cpu->acc = read(inp + 1) & comp->cpu->acc;
+      cpu->acc = read(inp + 1) & cpu->acc;
       inp += 2;
       zero(cpu->acc);
       nega(cpu->acc);
@@ -249,7 +249,7 @@ int run(){
 
       // AND
       case 0x2D:
-      cpu->acc = get(abs(inp + 1)) & comp->cpu->acc;
+      cpu->acc = get(abs(inp + 1)) & cpu->acc;
       inp += 3;
       zero(cpu->acc);
       nega(cpu->acc);
@@ -265,17 +265,21 @@ int run(){
       inp += 3;
       break;
 
+      // BMI
       case 0x30:
-
-      break;
-
-      case 0x31:
-
+      inp = cpu->flags & N ? rel(inp) : inp + 2;
       break;
 
       // AND
+      case 0x31:
+      cpu->acc = get(indy(inp + 1)) & cpu->acc;
+      inp += 2;
+      zero(cpu->acc);
+      nega(cpu->acc);
+      break;
+
       case 0x35:
-      cpu->acc = get(zpgx(inp + 1)) & comp->cpu->acc;
+      cpu->acc = get(zpgx(inp + 1)) & cpu->acc;
       inp += 2;
       zero(cpu->acc);
       nega(cpu->acc);
@@ -291,20 +295,21 @@ int run(){
       inp += 2;
       break;
 
+      // SEC
       case 0x38:
-
+      cpu->flags |= C;
       break;
 
       // AND
       case 0x39:
-      cpu->acc = get(absy(inp + 1)) & comp->cpu->acc;
+      cpu->acc = get(absy(inp + 1)) & cpu->acc;
       inp += 3;
       zero(cpu->acc);
       nega(cpu->acc);
       break;
 
       case 0x3D:
-      cpu->acc = get(absx(inp + 1)) & comp->cpu->acc;
+      cpu->acc = get(absx(inp + 1)) & cpu->acc;
       inp += 3;
       zero(cpu->acc);
       nega(cpu->acc);
