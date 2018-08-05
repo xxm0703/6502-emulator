@@ -502,7 +502,7 @@ int run() {
 			cpu->acc = mem[cpu->SP++];
 			zero(cpu->acc);
 			nega(cpu->acc);
-			inp += 1
+			inp++;
         break;
 
         // ADC
@@ -584,8 +584,10 @@ int run() {
             inp += 2;
             break;
 
+			// SEI
         case 0x78:
-
+			cpu->flags |= I;
+			inp++;
             break;
 
             // ADC
@@ -617,16 +619,20 @@ int run() {
             inp += 3;
             break;
 
+			// STA
         case 0x81:
-
+			mem[indx(inp + 1)] = cpu->acc;
+			inp += 2;
             break;
 
         case 0x84:
 
             break;
 
+			// STA
         case 0x85:
-
+			mem[zpg(inp + 1)] = cpu->acc;
+			inp += 2;
             break;
 
         case 0x86:
@@ -645,8 +651,10 @@ int run() {
 
             break;
 
+			// STA
         case 0x8D:
-
+			mem[abs(inp + 1)] = cpu->acc;
+			inp += 3;
             break;
 
         case 0x8E:
@@ -657,16 +665,20 @@ int run() {
 
             break;
 
+			// STA
         case 0x91:
-
+			mem[indy(inp + 1)] = cpu->acc;
+			inp += 2;
             break;
 
         case 0x94:
 
             break;
 
+			// STA
         case 0x95:
-
+			mem[zpgx(inp + 1)] = cpu->acc;
+			inp += 2;
             break;
 
         case 0x96:
@@ -677,16 +689,20 @@ int run() {
 
             break;
 
+			// STA
         case 0x99:
-
+			mem[absy(inp + 1)] = cpu->acc;
+			inp += 3;
             break;
 
         case 0x9A:
 
             break;
 
+			// STA
         case 0x9D:
-
+			mem[absx(inp + 1)] = cpu->acc;
+			inp += 3;
             break;
 
         case 0xA0:
