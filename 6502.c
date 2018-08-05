@@ -499,7 +499,10 @@ int run() {
 
             // PLA
         case 0x68
-
+			cpu->acc = mem[cpu->SP++];
+			zero(cpu->acc);
+			nega(cpu->acc);
+			inp += 1
         break;
 
         // ADC
@@ -547,8 +550,9 @@ int run() {
             inp += 3;
             break;
 
+			// BVS
         case 0x70:
-
+			inp = cpu->flags & V ? rel(inp) : inp + 2;
             break;
 
             // ADC
