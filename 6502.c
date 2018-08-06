@@ -625,8 +625,10 @@ int run() {
 			inp += 2;
             break;
 
+			// STY
         case 0x84:
-
+			mem[zpg(inp + 1)] = cpu->Y;
+			inp += 2;
             break;
 
 			// STA
@@ -647,8 +649,10 @@ int run() {
 
             break;
 
+			// STY
         case 0x8C:
-
+			mem[abs(inp + 1)] = cpu->Y;
+			inp += 3;
             break;
 
 			// STA
@@ -671,8 +675,10 @@ int run() {
 			inp += 2;
             break;
 
+			// STY
         case 0x94:
-
+			mem[zpgx(inp + 1)] = cpu->Y;
+			inp += 2;
             break;
 
 			// STA
