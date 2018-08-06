@@ -796,8 +796,12 @@ int run() {
 			inp += 2;
             break;
 
+			// TAX
         case 0xAA:
-
+			cpu->X = cpu->acc;
+			zero(cpu->acc);
+			nega(cpu->acc);
+			inp++;
             break;
 
 			// LDY
