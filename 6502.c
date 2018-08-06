@@ -780,8 +780,12 @@ int run() {
 			inp += 2;
             break;
 
+			// TAY
         case 0xA8:
-
+			cpu->Y = cpu->acc;
+			zero(cpu->acc);
+			nega(cpu->acc);
+			inp++;
             break;
 
 			// LDA
