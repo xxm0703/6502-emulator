@@ -637,8 +637,10 @@ int run() {
 			inp += 2;
             break;
 
+			// STX
         case 0x86:
-
+			mem[zpg(inp + 1)] = cpu->X;
+			inp += 2;
             break;
 
         case 0x88:
@@ -661,8 +663,10 @@ int run() {
 			inp += 3;
             break;
 
+			// STX
         case 0x8E:
-
+			mem[abs(inp + 1)] = cpu->X;
+			inp += 3;
             break;
 
         case 0x90:
@@ -687,8 +691,10 @@ int run() {
 			inp += 2;
             break;
 
+			// STX
         case 0x96:
-
+			mem[zpgy(inp + 1)] = cpu->X;
+			inp += 2;
             break;
 
         case 0x98:
