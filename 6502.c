@@ -649,8 +649,10 @@ int run() {
 			inp++;
             break;
 
+			// TXA
         case 0x8A:
-
+			cpu->acc = cpu->X;
+			inp++;
             break;
 
 			// STY
