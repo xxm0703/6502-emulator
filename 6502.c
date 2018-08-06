@@ -732,8 +732,10 @@ int run() {
 			inp += 2;
             break;
 
+			// LDA
         case 0xA1:
-
+			cpu->acc = get(indx(inp + 1));
+			inp += 2;
             break;
 
         case 0xA2:
@@ -746,8 +748,10 @@ int run() {
 			inp += 2;
             break;
 
+			// LDA
         case 0xA5:
-
+			cpu->acc = get(zpg(inp + 1));
+			inp += 2;
             break;
 
         case 0xA6:
@@ -758,8 +762,10 @@ int run() {
 
             break;
 
+			// LDA
         case 0xA9:
-
+			cpu->acc = read(inp + 1);
+			inp += 2;
             break;
 
         case 0xAA:
@@ -772,9 +778,11 @@ int run() {
 			inp += 3;
             break;
 
+			// LDA
         case 0xAD:
-
-            break;
+			cpu->acc = get(abs(inp + 1));
+			inp += 3;
+			break;
 
         case 0xAE:
 
@@ -784,8 +792,10 @@ int run() {
 
             break;
 
+			// LDA
         case 0xB1:
-
+			cpu->acc = get(indy(inp + 1));
+			inp += 2;
             break;
 
 			// LDY
@@ -794,8 +804,10 @@ int run() {
 			inp += 2;
             break;
 
+			// LDA
         case 0xB5:
-
+			cpu->acc = get(zpgx(inp + 1));
+			inp += 2;
             break;
 
         case 0xB6:
@@ -806,8 +818,10 @@ int run() {
 
             break;
 
+			// LDA
         case 0xB9:
-
+			cpu->acc = get(absy(inp + 1));
+			inp += 3;
             break;
 
         case 0xBA:
@@ -821,7 +835,8 @@ int run() {
             break;
 
         case 0xBD:
-
+			cpu->acc = get(absx(inp + 1));
+			inp += 3;
             break;
 
         case 0xBE:
