@@ -726,8 +726,10 @@ int run() {
 			inp += 3;
             break;
 
+			// LDY
         case 0xA0:
-
+			cpu->Y = read(inp + 1);
+			inp += 2;
             break;
 
         case 0xA1:
@@ -738,8 +740,10 @@ int run() {
 
             break;
 
+			// LDY
         case 0xA4:
-
+			cpu->Y = get(zpg(inp + 1));
+			inp += 2;
             break;
 
         case 0xA5:
@@ -762,8 +766,10 @@ int run() {
 
             break;
 
+			// LDY
         case 0xAC:
-
+			cpu->Y = get(abs(inp + 1));
+			inp += 3;
             break;
 
         case 0xAD:
@@ -782,8 +788,10 @@ int run() {
 
             break;
 
+			// LDY
         case 0xB4:
-
+			cpu->Y = get(zpgx(inp + 1));
+			inp += 2;
             break;
 
         case 0xB5:
@@ -806,8 +814,10 @@ int run() {
 
             break;
 
+			// LDY
         case 0xBC:
-
+			cpu->Y = get(absx(inp + 1));
+			inp += 3;
             break;
 
         case 0xBD:
