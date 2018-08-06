@@ -39,7 +39,10 @@ int run() {
 
             // BRK
         case 0x0:
-            inp += 2;
+			cpu->flags |= I;
+            mem[1 << 8 | cpu->SP--] = (inp + 2) >> 8;
+			mem[1 << 8 | cpu->SP--] = (inp + 2) & 0xFF;
+            mem[1 << 8 | cpu->SP--] = cpu->flags;
             break;
 
             // ORA
@@ -177,7 +180,7 @@ int run() {
             // JSR
         case 0x20:
             mem[1 << 8 | cpu->SP--] = (inp + 2) >> 8;
-            mem[1 << 8 | cpu->SP--] = (inp + 2) & 0xFF;
+			mem[1 << 8 | cpu->SP--] = (inp + 2) & 0xFF;
             inp = abs(inp + 1);
             break;
 
@@ -329,7 +332,8 @@ int run() {
             // RTI
         case 0x40:
             cpu->flags = get(1 << 8 | cpu->SP++);
-            inp = get(1 << 8 | cpu->SP++) << 8 | get(1 << 8 | cpu->SP++);
+            inp = get(1 << 8 | cpu->SP + 1) | get(1 << 8 | cpu->SP + 2) << 8;
+			cpu->SP += 2;
             inp++;
             break;
 
@@ -465,7 +469,9 @@ int run() {
 
             // RTS
         case 0x60:
-            inp = get(1 << 8 | cpu->SP++) << 8 | get(1 << 8 | cpu->SP++);
+            inp = get(1 << 8 | cpu->SP + 1) | get(1 << 8 | cpu->SP + 2) << 8;
+			cpu->SP += 2;
+			inp++;
             break;
 
             // ADC
@@ -865,8 +871,10 @@ int run() {
 			inp += 2;
             break;
 
+			// CLV
         case 0xB8:
-
+			cpu->flags &= ~V;
+			inp++;
             break;
 
 			// LDA
