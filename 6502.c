@@ -828,8 +828,9 @@ int run() {
 			inp += 3;
             break;
 
+			// BCS
         case 0xB0:
-
+            inp = cpu->flags & C ? rel(inp) : inp + 2;
             break;
 
 			// LDA
