@@ -748,8 +748,12 @@ int run() {
 			inp += 2;
             break;
 
+			// LDX
         case 0xA2:
-
+			cpu->X = read(inp + 1);
+			nega(cpu->X);
+			zero(cpu->X);
+			inp += 2;
             break;
 
 			// LDY
@@ -768,8 +772,12 @@ int run() {
 			inp += 2;
             break;
 
+			// LDX
         case 0xA6:
-
+			cpu->X = get(zpg(inp + 1));
+			nega(cpu->X);
+			zero(cpu->X);
+			inp += 2;
             break;
 
         case 0xA8:
@@ -804,8 +812,12 @@ int run() {
 			inp += 3;
 			break;
 
+			// LDX
         case 0xAE:
-
+			cpu->X = get(abs(inp + 1));
+			nega(cpu->X);
+			zero(cpu->X);
+			inp += 3;
             break;
 
         case 0xB0:
@@ -836,8 +848,12 @@ int run() {
 			inp += 2;
             break;
 
+			// LDX
         case 0xB6:
-
+			cpu->X = get(zpgy(inp + 1));
+			nega(cpu->X);
+			zero(cpu->X);
+			inp += 2;
             break;
 
         case 0xB8:
@@ -872,8 +888,12 @@ int run() {
 			inp += 3;
             break;
 
+			// LDX
         case 0xBE:
-
+			cpu->X = get(absy(inp + 1));
+			nega(cpu->X);
+			zero(cpu->X);
+			inp += 3;
             break;
 
         case 0xC0:
