@@ -643,8 +643,10 @@ int run() {
 			inp += 2;
             break;
 
+			// DEY
         case 0x88:
-
+			cpu->Y--;
+			inp++;
             break;
 
         case 0x8A:
