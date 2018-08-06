@@ -702,8 +702,10 @@ int run() {
 			inp += 2;
             break;
 
+			// TYA
         case 0x98:
-
+			cpu->acc = cpu->Y;
+			inp++;
             break;
 
 			// STA
