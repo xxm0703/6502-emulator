@@ -360,7 +360,7 @@ int run() {
 
             // PHA
         case 0x48:
-            mem[cpu->SP--] = cpu->acc;
+            mem[1 << 8 | cpu->SP--] = cpu->acc;
             inp++;
             break;
 
@@ -499,7 +499,7 @@ int run() {
 
             // PLA
         case 0x68
-			cpu->acc = mem[cpu->SP++];
+			cpu->acc = mem[1 << 8 | cpu->SP++];
 			zero(cpu->acc);
 			nega(cpu->acc);
 			inp++;
@@ -714,8 +714,10 @@ int run() {
 			inp += 3;
             break;
 
+			// TXS
         case 0x9A:
-
+			mem[1 << 8 | cpu->SP--] = cpu->X;
+			inp++;
             break;
 
 			// STA
