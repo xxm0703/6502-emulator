@@ -673,8 +673,9 @@ int run() {
 			inp += 3;
             break;
 
+			// BCC
         case 0x90:
-
+			inp = cpu->flags & C ? inp + 2 : rel(inp);
             break;
 
 			// STA
