@@ -219,6 +219,7 @@ int run() {
             inp += 2;
             break;
 
+			// PLP
         case 0x28:
             cpu->flags = mem[1 << 8 | cpu->SP++];
             inp++;
@@ -728,7 +729,7 @@ int run() {
 
 			// TXS
         case 0x9A:
-			mem[1 << 8 | cpu->SP--] = cpu->X;
+			cpu->SP = cpu->X;
 			inp++;
             break;
 
@@ -885,8 +886,10 @@ int run() {
 			inp += 3;
             break;
 
+			// TSX
         case 0xBA:
-
+			cpu->X = cpu->SP;
+			inp++;
             break;
 
 			// LDY
