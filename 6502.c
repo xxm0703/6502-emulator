@@ -646,12 +646,16 @@ int run() {
 			// DEY
         case 0x88:
 			cpu->Y--;
+			nega(cpu->Y);
+			zero(cpu->Y);
 			inp++;
             break;
 
 			// TXA
         case 0x8A:
 			cpu->acc = cpu->X;
+			nega(cpu->X);
+			zero(cpu->X);
 			inp++;
             break;
 
@@ -705,6 +709,8 @@ int run() {
 			// TYA
         case 0x98:
 			cpu->acc = cpu->Y;
+			nega(cpu->acc);
+			zero(cpu->acc);
 			inp++;
             break;
 
@@ -729,12 +735,16 @@ int run() {
 			// LDY
         case 0xA0:
 			cpu->Y = read(inp + 1);
+			nega(cpu->Y);
+			zero(cpu->Y);
 			inp += 2;
             break;
 
 			// LDA
         case 0xA1:
 			cpu->acc = get(indx(inp + 1));
+			nega(cpu->acc);
+			zero(cpu->acc);
 			inp += 2;
             break;
 
@@ -745,12 +755,16 @@ int run() {
 			// LDY
         case 0xA4:
 			cpu->Y = get(zpg(inp + 1));
+			nega(cpu->Y);
+			zero(cpu->Y);
 			inp += 2;
             break;
 
 			// LDA
         case 0xA5:
 			cpu->acc = get(zpg(inp + 1));
+			nega(cpu->acc);
+			zero(cpu->acc);
 			inp += 2;
             break;
 
@@ -765,6 +779,8 @@ int run() {
 			// LDA
         case 0xA9:
 			cpu->acc = read(inp + 1);
+			nega(cpu->acc);
+			zero(cpu->acc);
 			inp += 2;
             break;
 
@@ -775,12 +791,16 @@ int run() {
 			// LDY
         case 0xAC:
 			cpu->Y = get(abs(inp + 1));
+			nega(cpu->Y);
+			zero(cpu->Y);
 			inp += 3;
             break;
 
 			// LDA
         case 0xAD:
 			cpu->acc = get(abs(inp + 1));
+			nega(cpu->acc);
+			zero(cpu->acc);
 			inp += 3;
 			break;
 
@@ -795,18 +815,24 @@ int run() {
 			// LDA
         case 0xB1:
 			cpu->acc = get(indy(inp + 1));
+			nega(cpu->acc);
+			zero(cpu->acc);
 			inp += 2;
             break;
 
 			// LDY
         case 0xB4:
 			cpu->Y = get(zpgx(inp + 1));
+			nega(cpu->Y);
+			zero(cpu->Y);
 			inp += 2;
             break;
 
 			// LDA
         case 0xB5:
 			cpu->acc = get(zpgx(inp + 1));
+			nega(cpu->acc);
+			zero(cpu->acc);
 			inp += 2;
             break;
 
@@ -821,6 +847,8 @@ int run() {
 			// LDA
         case 0xB9:
 			cpu->acc = get(absy(inp + 1));
+			nega(cpu->acc);
+			zero(cpu->acc);
 			inp += 3;
             break;
 
@@ -831,11 +859,16 @@ int run() {
 			// LDY
         case 0xBC:
 			cpu->Y = get(absx(inp + 1));
+			nega(cpu->Y);
+			zero(cpu->Y);
 			inp += 3;
             break;
 
+			// LDA
         case 0xBD:
 			cpu->acc = get(absx(inp + 1));
+			nega(cpu->acc);
+			zero(cpu->acc);
 			inp += 3;
             break;
 
