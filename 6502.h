@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 #ifndef 6502_H
 #define 6502_H
 
