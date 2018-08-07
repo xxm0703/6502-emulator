@@ -964,8 +964,12 @@ int run() {
 			inp += 2;
             break;
 
+			// INY
         case 0xC8:
-
+			cpu->Y++;
+			nega(cpu->Y);
+			zero(cpu->Y);
+			inp++;
             break;
 
 			// CMP
