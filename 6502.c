@@ -919,9 +919,13 @@ int run() {
 			inp += 3;
             break;
 
-			// BNE
+			// CPY
         case 0xC0:
-            inp = cpu->flags & Z ? inp + 2 : rel(inp);
+			p.as_16 = cpu->Y - read(inp + 1);
+			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			zero(p.as_8);
+			nega(p.as_8 & 0x80);
+			inp += 2;
             break;
 
 			// CMP
@@ -933,12 +937,22 @@ int run() {
 			inp += 2;
             break;
 
+			// CPY
         case 0xC4:
-
+			p.as_16 = cpu->Y - get(zpg(inp + 1));
+			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			zero(p.as_8);
+			nega(p.as_8 & 0x80);
+			inp += 2;
             break;
 
+			// CMP
         case 0xC5:
-
+			p.as_16 = cpu->acc - get(zpg(inp + 1));
+			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			zero(p.as_8);
+			nega(p.as_8 & 0x80);
+			inp += 2;
             break;
 
         case 0xC6:
@@ -949,36 +963,61 @@ int run() {
 
             break;
 
+			// CMP
         case 0xC9:
-
+			p.as_16 = cpu->acc - read(inp + 1);
+			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			zero(p.as_8);
+			nega(p.as_8 & 0x80);
+			inp += 2;
             break;
 
         case 0xCA:
 
             break;
 
+			// CPY
         case 0xCC:
-
+			p.as_16 = cpu->Y - get(abs(inp + 1));
+			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			zero(p.as_8);
+			nega(p.as_8 & 0x80);
+			inp += 3;
             break;
 
+			// CMP
         case 0xCD:
-
+			p.as_16 = cpu->acc - get(abs(inp + 1));
+			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			zero(p.as_8);
+			nega(p.as_8 & 0x80);
+			inp += 3;
             break;
 
         case 0xCE:
 
             break;
 
+			// BNE
         case 0xD0:
-
+            inp = cpu->flags & Z ? inp + 2 : rel(inp);
             break;
 
+			// CMP
         case 0xD1:
-
+			p.as_16 = cpu->acc - get(indy(inp + 1));
+			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			zero(p.as_8);
+			nega(p.as_8 & 0x80);
+			inp += 2;
             break;
 
         case 0xD5:
-
+			p.as_16 = cpu->acc - get(zpgx(inp + 1));
+			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			zero(p.as_8);
+			nega(p.as_8 & 0x80);
+			inp += 2;
             break;
 
         case 0xD6:
@@ -989,12 +1028,21 @@ int run() {
 
             break;
 
+			// CMP
         case 0xD9:
-
+			p.as_16 = cpu->acc - get(absy(inp + 1));
+			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			zero(p.as_8);
+			nega(p.as_8 & 0x80);
+			inp += 3;
             break;
 
         case 0xDD:
-
+			p.as_16 = cpu->acc - get(absx(inp + 1));
+			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			zero(p.as_8);
+			nega(p.as_8 & 0x80);
+			inp += 3;
             break;
 
         case 0xDE:
@@ -1002,15 +1050,24 @@ int run() {
             break;
 
         case 0xE0:
-
+			p.as_16 = cpu->X - read(inp + 1);
+			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			zero(p.as_8);
+			nega(p.as_8 & 0x80);
+			inp += 2;
             break;
 
         case 0xE1:
 
             break;
 
+			// CPX
         case 0xE4:
-
+			p.as_16 = cpu->X - get(zpg(inp + 1));
+			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			zero(p.as_8);
+			nega(p.as_8 & 0x80);
+			inp += 2;
             break;
 
         case 0xE5:
@@ -1033,8 +1090,13 @@ int run() {
 
             break;
 
+			// CPX
         case 0xEC:
-
+			p.as_16 = cpu->X - get(abs(inp + 1));
+			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			zero(p.as_8);
+			nega(p.as_8 & 0x80);
+			inp += 3;
             break;
 
         case 0xED:
