@@ -955,8 +955,13 @@ int run() {
 			inp += 2;
             break;
 
+			// DEC
         case 0xC6:
-
+			p.as_8 = get(zpg(inp + 1)) - 1;
+			nega(p.as_8);
+			zero(p.as_8);
+			mem[zpg(inp + 1)] = p.as_8;
+			inp += 2;
             break;
 
         case 0xC8:
@@ -994,8 +999,13 @@ int run() {
 			inp += 3;
             break;
 
+			// DEC
         case 0xCE:
-
+			p.as_8 = get(abs(inp + 1)) - 1;
+			nega(p.as_8);
+			zero(p.as_8);
+			mem[abs(inp + 1)] = p.as_8;
+			inp += 3;
             break;
 
 			// BNE
@@ -1020,8 +1030,13 @@ int run() {
 			inp += 2;
             break;
 
+			// DEC
         case 0xD6:
-
+			p.as_8 = get(zpgx(inp + 1)) - 1;
+			nega(p.as_8);
+			zero(p.as_8);
+			mem[zpgx(inp + 1)] = p.as_8;
+			inp += 2;
             break;
 
         case 0xD8:
@@ -1045,8 +1060,13 @@ int run() {
 			inp += 3;
             break;
 
+			// DEC
         case 0xDE:
-
+			p.as_8 = get(absx(inp + 1)) - 1;
+			nega(p.as_8);
+			zero(p.as_8);
+			mem[absx(inp + 1)] = p.as_8;
+			inp += 3;
             break;
 
         case 0xE0:
