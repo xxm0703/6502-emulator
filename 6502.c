@@ -977,8 +977,12 @@ int run() {
 			inp += 2;
             break;
 
+			// DEX
         case 0xCA:
-
+			cpu->X--;
+			nega(cpu->X);
+			zero(cpu->X);
+			inp++;
             break;
 
 			// CPY
