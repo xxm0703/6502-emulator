@@ -1047,8 +1047,10 @@ int run() {
 			inp += 2;
             break;
 
+			// CLD
         case 0xD8:
-
+			cpu->flags &= ~D;
+			inp++;
             break;
 
 			// CMP
