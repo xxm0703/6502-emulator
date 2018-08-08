@@ -1215,8 +1215,9 @@ int run() {
 			inp += 3;
             break;
 
+			// BEQ
         case 0xF0:
-
+            inp = cpu->flags & Z ? rel(inp) : inp + 2;
             break;
 
 			// SBC
