@@ -1079,6 +1079,7 @@ int run() {
 			inp += 3;
             break;
 
+			// CPX
         case 0xE0:
 			p.as_16 = cpu->X - read(inp + 1);
 			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
@@ -1087,8 +1088,24 @@ int run() {
 			inp += 2;
             break;
 
+			// SBC
         case 0xE1:
-
+		 	p.as_8 = get(indx(inp + 1));
+			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+			nega(p.as_8);
+			zero(p.as_8);
+		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(indx(inp + 1))) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    if (cpu->flags & D)
+		    {
+		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < (get(indx(inp + 1)) & 0x0F)) p.as_16 -= 6;
+		        if (p.as_16 > 0x99)
+		        {
+		        	p.as_16 -= 0x60;
+		        }
+		    }
+		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+			cpu->acc = p.as_8;
+			inp += 2;
             break;
 
 			// CPX
@@ -1100,8 +1117,24 @@ int run() {
 			inp += 2;
             break;
 
+			// SBC
         case 0xE5:
-
+		 	p.as_8 = get(zpg(inp + 1));
+			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+			nega(p.as_8);
+			zero(p.as_8);
+		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(zpg(inp + 1))) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    if (cpu->flags & D)
+		    {
+		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < (get(zpg(inp + 1)) & 0x0F)) p.as_16 -= 6;
+		        if (p.as_16 > 0x99)
+		        {
+		        	p.as_16 -= 0x60;
+		        }
+		    }
+		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+			cpu->acc = p.as_8;
+			inp += 2;
             break;
 
         case 0xE6:
@@ -1112,8 +1145,24 @@ int run() {
 
             break;
 
+			// SBC
         case 0xE9:
-
+		 	p.as_8 = read(inp + 1);
+			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+			nega(p.as_8);
+			zero(p.as_8);
+		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ read(inp + 1)) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    if (cpu->flags & D)
+		    {
+		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < read(inp + 1) & 0x0F)) p.as_16 -= 6;
+		        if (p.as_16 > 0x99)
+		        {
+		        	p.as_16 -= 0x60;
+		        }
+		    }
+		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+			cpu->acc = p.as_8;
+			inp += 2;
             break;
 
         case 0xEA:
@@ -1129,8 +1178,24 @@ int run() {
 			inp += 3;
             break;
 
+			// SBC
         case 0xED:
-
+		 	p.as_8 = get(abs(inp + 1));
+			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+			nega(p.as_8);
+			zero(p.as_8);
+		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(abs(inp + 1))) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    if (cpu->flags & D)
+		    {
+		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < get(abs(inp + 1)) & 0x0F)) p.as_16 -= 6;
+		        if (p.as_16 > 0x99)
+		        {
+		        	p.as_16 -= 0x60;
+		        }
+		    }
+		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+			cpu->acc = p.as_8;
+			inp += 3;
             break;
 
         case 0xEE:
@@ -1141,16 +1206,48 @@ int run() {
 
             break;
 
-        case 0xF1:
-
+			// SBC
+		case 0xF1:
+		 	p.as_8 = get(indy(inp + 1));
+			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+			nega(p.as_8);
+			zero(p.as_8);
+		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(indy(inp + 1))) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    if (cpu->flags & D)
+		    {
+		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < get(indy(inp + 1)) & 0x0F)) p.as_16 -= 6;
+		        if (p.as_16 > 0x99)
+		        {
+		        	p.as_16 -= 0x60;
+		        }
+		    }
+		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+			cpu->acc = p.as_8;
+			inp += 2;
             break;
 
         case 0xF4:
 
             break;
 
+			// SBC
         case 0xF5:
-
+		 	p.as_8 = get(zpgx(inp + 1));
+			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+			nega(p.as_8);
+			zero(p.as_8);
+		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(zpgx(inp + 1))) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    if (cpu->flags & D)
+		    {
+		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < get(zpgx(inp + 1)) & 0x0F)) p.as_16 -= 6;
+		        if (p.as_16 > 0x99)
+		        {
+		        	p.as_16 -= 0x60;
+		        }
+		    }
+		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+			cpu->acc = p.as_8;
+			inp += 2;
             break;
 
         case 0xF6:
@@ -1161,12 +1258,43 @@ int run() {
 
             break;
 
+			// SBC
         case 0xF9:
-
+		 	p.as_8 = get(absy(inp + 1));
+			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+			nega(p.as_8);
+			zero(p.as_8);
+		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(absy(inp + 1))) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    if (cpu->flags & D)
+		    {
+		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < get(absy(inp + 1)) & 0x0F)) p.as_16 -= 6;
+		        if (p.as_16 > 0x99)
+		        {
+		        	p.as_16 -= 0x60;
+		        }
+		    }
+		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+			cpu->acc = p.as_8;
+			inp += 3;
             break;
 
         case 0xFD:
-
+		 	p.as_8 = get(absx(inp + 1));
+			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+			nega(p.as_8);
+			zero(p.as_8);
+		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(absx(inp + 1))) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    if (cpu->flags & D)
+		    {
+		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < get(absx(inp + 1)) & 0x0F)) p.as_16 -= 6;
+		        if (p.as_16 > 0x99)
+		        {
+		        	p.as_16 -= 0x60;
+		        }
+		    }
+		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+			cpu->acc = p.as_8;
+			inp += 3;
             break;
 
         case 0xFE:
