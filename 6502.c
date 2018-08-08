@@ -1143,8 +1143,10 @@ int run() {
 			inp += 2;
             break;
 
+			// INX
         case 0xE8:
-
+			cpu->X++;
+			inp++;
             break;
 
 			// SBC
