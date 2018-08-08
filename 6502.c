@@ -1139,13 +1139,17 @@ int run() {
 
 			// INC
         case 0xE6:
-			mem[zpg(inp + 1)]++;
+			p.as_8 = ++mem[zpg(inp + 1)];
+			zero(p.as_8);
+			nega(p.as_8);
 			inp += 2;
             break;
 
 			// INX
         case 0xE8:
 			cpu->X++;
+			nega(cpu->X);
+			zero(cpu->X);
 			inp++;
             break;
 
@@ -1204,7 +1208,9 @@ int run() {
 
 			// INC
         case 0xEE:
-			mem[abs(inp + 1)]++;
+			p.as_8 = ++mem[abs(inp + 1)];
+			zero(p.as_8);
+			nega(p.as_8);
 			inp += 3;
             break;
 
@@ -1258,7 +1264,9 @@ int run() {
 
 			// INC
         case 0xF6:
-			mem[zpgx(inp + 1)]++;
+			p.as_8 = ++mem[zpgx(inp + 1)];
+			zero(p.as_8);
+			nega(p.as_8);
 			inp += 2;
             break;
 
@@ -1307,7 +1315,9 @@ int run() {
 
 			// INC
         case 0xFE:
-			mem[absx(inp + 1)]++;
+			p.as_8 = ++mem[absx(inp + 1)];
+			zero(p.as_8);
+			nega(p.as_8);
 			inp += 3;
             break;
         }
