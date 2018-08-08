@@ -1,7 +1,7 @@
 #include "6502.h"
 #include <stdlib.h>
 
-inline uint16_t ind(uint16_t add) return norm(comp.mem, norm(comp.ins, add));
+inline uint16_t ind(uint8_t add) return norm(comp.mem, norm(comp.ins, add));
 inline uint16_t indx(uint8_t zpg) return norm(comp.mem, read(zpg) + comp.cpu->X);
 inline uint16_t indy(uint8_t zpg) return norm(comp.mem, read(zpg)) + comp, cpu->Y;
 
@@ -13,10 +13,10 @@ inline uint16_t abs(int16_t abs) return norm(comp.ins, abs);
 inline uint16_t absx(uint16_t abs) return abs(abs) + comp.cpu->X;
 inline uint16_t absy(uint16_t abs) return abs(abs) + comp.cpu->Y;
 
-inline uint8_t get(uint16_t abs) return comp.mem[abs];
 inline uint16_t rel(uint8_t inp) return inp + read(inp + 1);
+inline uint16_t norm(uint8_t *src, uint16_t inx) return src[inx] | src[inx + 1] << 8;
 inline uint8_t read(uint16_t pc) return comp.ins[pc];
-inline uint8_t norm(uint8_t *src, uint16_t inx) return src[inx] | src[inx + 1] << 8;
+inline uint8_t get(uint16_t abs) return comp.mem[abs];
 
 machine_t comp;
 

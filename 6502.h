@@ -25,9 +25,22 @@ typedef struct {
         int8_t *mem, *ins;
 } machine_t;
 
-inline uint16_t ind(uint8_t, int8_t);
+inline uint16_t ind(uint8_t);
+inline uint16_t indx(uint8_t);
+inline uint16_t indy(uint8_t);
+
 inline uint16_t zpg(uint8_t);
-inline uint16_t abs(uint16_t);
+inline uint16_t zpgx(uint8_t);
+inline uint16_t zpgy(uint8_t);
+
+inline uint16_t abs(uint8_t);
+inline uint16_t absx(uint8_t);
+inline uint16_t absy(uint8_t);
+
+inline uint16_t rel(uint8_t);
+inline uint16_t norm(uint8_t *, uint16_t);
+inline uint8_t get(uint16_t);
+inline uint8_t read(uint16_t);
 
 
 
