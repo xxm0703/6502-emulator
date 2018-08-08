@@ -18,19 +18,23 @@ inline uint16_t norm(uint8_t *src, uint16_t inx) return src[inx] | src[inx + 1] 
 inline uint8_t read(uint16_t pc) return comp.ins[pc];
 inline uint8_t get(uint16_t abs) return comp.mem[abs];
 
-machine_t comp;
+machine_t mach;
 
 int main() {
-    comp.mem = (uint8_t *) malloc(64 * 1024 * sizeof(int8_t));
-    comp.ins = (uint8_t *) malloc(64 * 1024 * sizeof(int8_t));
-    comp.cpu = (cpu_t *) malloc(sizeof(cpu_t));
-    // run(&comp)
+	setup_machine(&mach);
+    run(&mach);
     return 0;
 }
 
-int run() {
-    int8_t *mem = comp.mem;
-    cpu_t *cpu = comp.cpu;
+void setup_machine(machine_t *m){
+	m->mem = (uint8_t *) malloc(64 * 1024 * sizeof(uint8_t));
+    m->ins = (uint8_t *) malloc(64 * 1024 * sizeof(uint8_t));
+    m->cpu = (cpu_t *) malloc(sizeof(cpu_t));
+}
+
+int run(machine_t *comp) {
+    int8_t *mem = comp->mem;
+    cpu_t *cpu = comp->cpu;
     uint16_t inp = cpu->PC;
 	union{
 		uint16_t as_16;

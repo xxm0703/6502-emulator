@@ -25,6 +25,8 @@ typedef struct {
         int8_t *mem, *ins;
 } machine_t;
 
+void setup_machine(machine_t *);
+
 inline uint16_t ind(uint8_t);
 inline uint16_t indx(uint8_t);
 inline uint16_t indy(uint8_t);
