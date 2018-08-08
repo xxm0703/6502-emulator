@@ -1137,8 +1137,10 @@ int run() {
 			inp += 2;
             break;
 
+			// INC
         case 0xE6:
-
+			mem[zpg(inp + 1)]++;
+			inp += 2;
             break;
 
         case 0xE8:
@@ -1198,8 +1200,10 @@ int run() {
 			inp += 3;
             break;
 
+			// INC
         case 0xEE:
-
+			mem[abs(inp + 1)]++;
+			inp += 3;
             break;
 
         case 0xF0:
@@ -1250,8 +1254,10 @@ int run() {
 			inp += 2;
             break;
 
+			// INC
         case 0xF6:
-
+			mem[zpgx(inp + 1)]++;
+			inp += 2;
             break;
 
         case 0xF8:
@@ -1297,8 +1303,10 @@ int run() {
 			inp += 3;
             break;
 
+			// INC
         case 0xFE:
-
+			mem[absx(inp + 1)]++;
+			inp += 3;
             break;
         }
 
