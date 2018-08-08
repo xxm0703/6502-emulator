@@ -1240,10 +1240,6 @@ int run() {
 			inp += 2;
             break;
 
-        case 0xF4:
-
-            break;
-
 			// SBC
         case 0xF5:
 		 	p.as_8 = get(zpgx(inp + 1));
@@ -1272,8 +1268,10 @@ int run() {
 			inp += 2;
             break;
 
+			// SED
         case 0xF8:
-
+			cpu->flags |= D;
+			inp++;
             break;
 
 			// SBC
