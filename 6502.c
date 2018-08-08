@@ -1173,8 +1173,9 @@ int run() {
 			inp += 2;
             break;
 
+			// NOP
         case 0xEA:
-
+			inp++;
             break;
 
 			// CPX
