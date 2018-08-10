@@ -1,29 +1,51 @@
 #include "6502.h"
 #include <stdlib.h>
 
-inline uint16_t ind(uint8_t add) return norm(comp.mem, norm(comp.ins, add));
-inline uint16_t indx(uint8_t zpg) return norm(comp.mem, read(zpg) + comp.cpu->X);
-inline uint16_t indy(uint8_t zpg) return norm(comp.mem, read(zpg)) + comp, cpu->Y;
-
-inline uint16_t zpg(uint8_t zpg) return read(zpg);
-inline uint16_t zpgx(uint8_t zpg) return zpg(zpg) + comp.cpu->X;
-inline uint16_t zpgy(uint8_t zpg) return zpg(zpg) + comp.cpu->Y;
-
-inline uint16_t abs(int16_t abs) return norm(comp.ins, abs);
-inline uint16_t absx(uint16_t abs) return abs(abs) + comp.cpu->X;
-inline uint16_t absy(uint16_t abs) return abs(abs) + comp.cpu->Y;
-
-inline uint16_t rel(uint8_t inp) return inp + read(inp + 1);
-inline uint16_t norm(uint8_t *src, uint16_t inx) return src[inx] | src[inx + 1] << 8;
-inline uint8_t read(uint16_t pc) return comp.ins[pc];
-inline uint8_t get(uint16_t abs) return comp.mem[abs];
 
 machine_t mach;
 
-int main() {
-	setup_machine(&mach);
-    run(&mach);
-    return 0;
+extern uint8_t inline read(uint16_t pc){
+	return mach.ins[pc];
+}
+extern uint16_t inline rel(uint8_t inp){
+	return inp + read(inp + 1);
+}
+extern uint16_t inline norm(uint8_t *src, uint16_t inx){
+	return src[inx] | src[inx + 1] << 8;
+}
+extern uint8_t inline get(uint16_t abs){
+	return mach.mem[abs];
+}
+
+extern uint16_t inline ind(uint8_t add){
+	return norm(mach.mem, norm(mach.ins, add));
+}
+
+extern uint16_t inline indx(uint8_t zpg){
+	return norm(mach.mem, read(zpg) + mach.cpu->X);
+}
+extern uint16_t inline indy(uint8_t zpg){
+	return norm(mach.mem, read(zpg)) + mach.cpu->Y;
+}
+
+extern uint16_t inline zpg(uint8_t zpg){
+	return read(zpg);
+}
+extern uint16_t inline zpgx(uint8_t add){
+	return zpg(add) + mach.cpu->X;
+}
+extern uint16_t inline zpgy(uint8_t add){
+	return zpg(add) + mach.cpu->Y;
+}
+
+extern uint16_t inline absm(uint8_t abs){
+	return norm(mach.ins, abs);
+}
+extern uint16_t inline absx(uint8_t abs){
+	return absm(abs) + mach.cpu->X;
+}
+extern uint16_t inline absy(uint8_t abs){
+	return absm(abs) + mach.cpu->Y;
 }
 
 void setup_machine(machine_t *m){
@@ -69,8 +91,8 @@ int run(machine_t *comp) {
 
             // ASL
         case 0x6:
-            p.as_8 = get(zpg(inp + 1))
-            p.as_8 >> 7 ? cpu->flags |= C : cpu->flags &= ~C;
+            p.as_8 = get(zpg(inp + 1));
+			cary(p.as_8 >> 7);
             p.as_8 <<= 1;
             zero(p.as_8);
             nega(p.as_8);
@@ -95,7 +117,7 @@ int run(machine_t *comp) {
 
             // ASL
         case 0xA:
-            cpu->acc >> 7 ? cpu->flags |= C : cpu->flags &= ~C;
+			cary(cpu->acc >> 7);
             cpu->acc <<= 1;
             zero(cpu->acc);
             nega(cpu->acc);
@@ -104,7 +126,7 @@ int run(machine_t *comp) {
 
             // ORA
         case 0xD:
-            cpu->acc = get(abs(inp + 1)) | cpu->acc;
+            cpu->acc = get(absm(inp + 1)) | cpu->acc;
             inp += 3;
             zero(cpu->acc);
             nega(cpu->acc);
@@ -112,12 +134,12 @@ int run(machine_t *comp) {
 
             // ASL
         case 0xE:
-            p.as_8 = get(abs(inp + 1));
-            p.as_8 >> 7 ? cpu->flags |= C : cpu->flags &= ~C;
+            p.as_8 = get(absm(inp + 1));
+			cary(p.as_8 >> 7);
             p.as_8 <<= 1;
             zero(p.as_8);
             nega(p.as_8);
-            mem[abs(inp + 1)] = p.as_8;
+            mem[absm(inp + 1)] = p.as_8;
             inp += 3;
             break;
 
@@ -143,8 +165,8 @@ int run(machine_t *comp) {
 
             // ASL
         case 0x16:
-            p.as_8 = get(zpgx(inp + 1))
-            p.as_8 >> 7 ? cpu->flags |= C : cpu->flags &= ~C;
+            p.as_8 = get(zpgx(inp + 1));
+			cary(p.as_8 >> 7);
             p.as_8 <<= 1;
             zero(p.as_8);
             nega(p.as_8);
@@ -176,7 +198,7 @@ int run(machine_t *comp) {
             // ASL
         case 0x1E:
             p.as_8 = get(absx(inp + 1));
-            p.as_8 >> 7 ? cpu->flags |= C : cpu->flags &= ~C;
+			cary(p.as_8 >> 7);
             p.as_8 <<= 1;
             zero(p.as_8);
             nega(p.as_8);
@@ -188,7 +210,7 @@ int run(machine_t *comp) {
         case 0x20:
             mem[1 << 8 | cpu->SP--] = (inp + 2) >> 8;
 			mem[1 << 8 | cpu->SP--] = (inp + 2) & 0xFF;
-            inp = abs(inp + 1);
+            inp = absm(inp + 1);
             break;
 
             // AND
@@ -203,7 +225,7 @@ int run(machine_t *comp) {
         case 0x24:
             p.as_8 = get(zpg(inp + 1));
             nega(p.as_8);
-            p.as_8 & 0x80 ? cpu->flags |= V : cpu->flags &= ~V;
+            ovrf(p.as_8 & 0x80);
             zero(cpu->acc & p.as_8);
             inp += 2;
             break;
@@ -218,9 +240,9 @@ int run(machine_t *comp) {
 
             // ROL
         case 0x26:
-            p.as_8 = get(zpg(inp + 1)) >> 7;
-            mem[zpg(inp + 1)] = mem[zpg(inp + 1)] << 1 | (cpu->flags & C);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
+            p.as_8 = get(zpg(inp + 1));
+            mem[zpg(inp + 1)] = p.as_8 << 1 | (cpu->flags & C);
+			cary(p.as_8 >> 7);
             zero(cpu->acc);
             nega(cpu->acc);
             inp += 2;
@@ -242,9 +264,9 @@ int run(machine_t *comp) {
 
             // ROL
         case 0x2A:
-            p.as_8 = cpu->acc >> 7;
+            p.as_8 = cpu->acc;
             cpu->acc = cpu->acc << 1 | (cpu->flags & C);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
+			cary(p.as_8 >> 7);
             zero(cpu->acc);
             nega(cpu->acc);
             inp++;
@@ -252,16 +274,16 @@ int run(machine_t *comp) {
 
             // BIT
         case 0x2C:
-            p.as_8 = get(abs(inp + 1));
+            p.as_8 = get(absm(inp + 1));
             nega(p.as_8);
-            p.as_8 & 0x80 ? cpu->flags |= V : cpu->flags &= ~V;
+            ovrf(p.as_8 & 0x80);
             zero(cpu->acc & p.as_8);
             inp += 3;
             break;
 
             // AND
         case 0x2D:
-            cpu->acc = get(abs(inp + 1)) & cpu->acc;
+            cpu->acc = get(absm(inp + 1)) & cpu->acc;
             inp += 3;
             zero(cpu->acc);
             nega(cpu->acc);
@@ -269,9 +291,9 @@ int run(machine_t *comp) {
 
             // ROL
         case 0x2E:
-            p.as_8 = get(abs(inp + 1)) >> 7;
-            mem[abs(inp + 1)] = mem[abs(inp + 1)] << 1 | (cpu->flags & C);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
+            p.as_8 = get(absm(inp + 1));
+            mem[absm(inp + 1)] = p.as_8 << 1 | (cpu->flags & C);
+            cary(p.as_8 >> 7);
             zero(cpu->acc);
             nega(cpu->acc);
             inp += 3;
@@ -299,10 +321,10 @@ int run(machine_t *comp) {
 
             // ROL
         case 0x36:
-            p.as_8 = get(zpgx(inp + 1)) >> 7;
-            mem[zpgx(inp + 1)] = mem[zpgx(inp + 1)] << 1 | (cpu->flags & C);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
-            zero(cpu->acc);
+            p.as_8 = get(zpgx(inp + 1));
+            mem[zpgx(inp + 1)] = p.as_8 << 1 | (cpu->flags & C);
+            cary(p.as_8 >> 7);
+			zero(cpu->acc);
             nega(cpu->acc);
             inp += 2;
             break;
@@ -329,9 +351,9 @@ int run(machine_t *comp) {
 
             // ROL
         case 0x3E:
-            p.as_8 = get(absx(inp + 1)) >> 7;
-            mem[absx(inp + 1)] = mem[absx(inp + 1)] << 1 | (cpu->flags & C);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
+            p.as_8 = get(absx(inp + 1));
+            mem[absx(inp + 1)] = p.as_8 << 1 | (cpu->flags & C);
+            cary(p.as_8 >> 7);
             zero(cpu->acc);
             nega(cpu->acc);
             inp += 3;
@@ -363,7 +385,7 @@ int run(machine_t *comp) {
             // LSR
         case 0x46:
             p.as_8 = get(zpg(inp + 1));
-            cpu->flags |= (p.as_8 & 1);
+			cary(p.as_8 & 1);
             p.as_8 >>= 1;
             zero(p.as_8);
             mem[zpg(inp + 1)] = p.as_8;
@@ -386,7 +408,7 @@ int run(machine_t *comp) {
 
             // LSR
         case 0x4A:
-            cpu->flags |= (cpu->acc & 1);
+			cary(cpu->acc & 1);
             cpu->acc >>= 1;
             zero(cpu->acc);
             inp++;
@@ -394,12 +416,12 @@ int run(machine_t *comp) {
 
             // JMP
         case 0x4C:
-            inp = abs(inp + 1);
+            inp = absm(inp + 1);
             break;
 
             // EOR
         case 0x4D:
-            cpu->acc = get(abs(inp + 1)) & cpu->acc;
+            cpu->acc = get(absm(inp + 1)) & cpu->acc;
             inp += 3;
             zero(cpu->acc);
             nega(cpu->acc);
@@ -407,11 +429,11 @@ int run(machine_t *comp) {
 
             // LSR
         case 0x4E:
-            p.as_8 = get(abs(inp + 1));
-            cpu->flags |= (p.as_8 & 1);
+            p.as_8 = get(absm(inp + 1));
+			cary(p.as_8 & 1);
             p.as_8 >>= 1;
             zero(p.as_8);
-            mem[abs(inp + 1)] = p.as_8;
+            mem[absm(inp + 1)] = p.as_8;
             inp += 3;
             break;
 
@@ -438,7 +460,7 @@ int run(machine_t *comp) {
             // LSR
         case 0x56:
             p.as_8 = get(zpgx(inp + 1));
-            cpu->flags |= (p.as_8 & C);
+			cary(p.as_8 & 1);
             p.as_8 >>= 1;
             zero(p.as_8);
             mem[zpgx(inp + 1)] = p.as_8;
@@ -468,7 +490,7 @@ int run(machine_t *comp) {
             // LSR
         case 0x5E:
             p.as_8 = get(absx(inp + 1));
-            cpu->flags |= (p.as_8 & 1);
+			cary(p.as_8 & 1);
             p.as_8 >>= 1;
             zero(p.as_8);
             mem[absx(inp + 1)] = p.as_8;
@@ -484,55 +506,56 @@ int run(machine_t *comp) {
 
             // ADC
         case 0x61:
-            p.as_8 = ((uint16_t)(cpu->acc) + get(indx(inp + 1)) + cpu->flags & C) >> 8;
-            cpu->acc = (uint16_t)(cpu->acc) + get(indx(inp + 1)) + cpu->flags & C;
+            p.as_8 = (uint16_t)(cpu->acc) + get(indx(inp + 1)) + cpu->flags & C;
+            cpu->acc = p.as_8;
+			cary(p.as_8 >> 7);
             zero(cpu->acc);
             nega(cpu->acc);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
             inp += 2;
             break;
 
         case 0x65:
-            p.as_8 = ((uint16_t)(cpu->acc) + get(zpg(inp + 1)) + cpu->flags & C) >> 8;
-            cpu->acc = (uint16_t)(cpu->acc) + get(zpg(inp + 1)) + cpu->flags & C;
+            p.as_8 = (uint16_t)(cpu->acc) + get(zpg(inp + 1)) + cpu->flags & C;
+            cpu->acc = p.as_8;
+			cary(p.as_8 >> 7);
             zero(cpu->acc);
             nega(cpu->acc);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
             inp += 2;
             break;
 
             // ROR
         case 0x66:
-            p.as_8 = get(zpg(inp + 1)) & 1;
-            mem[zpg(inp + 1)] = mem[zpg(inp + 1)] >> 1 | (cpu->flags << 7);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
+            p.as_8 = get(zpg(inp + 1));
+            mem[zpg(inp + 1)] = p.as_8 >> 1 | (cpu->flags << 7);
+			cary(p.as_8 & 1);
             zero(cpu->acc);
             nega(cpu->acc);
             inp += 2;
             break;
 
             // PLA
-        case 0x68
+        case 0x68:
 			cpu->acc = mem[1 << 8 | cpu->SP++];
 			zero(cpu->acc);
 			nega(cpu->acc);
 			inp++;
         break;
 
-        // ADC
+        	// ADC
         case 0x69:
-            p.as_8 = ((uint16_t)(cpu->acc) + read(inp + 1) + cpu->flags & C) >> 8;
-            cpu->acc = (uint16_t)(cpu->acc) + read(inp + 1) + cpu->flags & C;
+            p.as_8 = (uint16_t)(cpu->acc) + read(inp + 1) + cpu->flags & C;
+            cpu->acc = p.as_8;
+			cary(p.as_8 >> 7);
             zero(cpu->acc);
             nega(cpu->acc);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
             inp += 2;
             break;
 
+			// ROR
         case 0x6A:
-            p.as_8 = cpu->acc & 1;
+            p.as_8 = cpu->acc;
             cpu->acc = cpu->acc >> 1 | (cpu->flags << 7);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
+			cary(p.as_8 & 1);
             zero(cpu->acc);
             nega(cpu->acc);
             inp += 1;
@@ -546,19 +569,19 @@ int run(machine_t *comp) {
 
             // ADC
         case 0x6D:
-            p.as_8 = ((uint16_t)(cpu->acc) + get(abs(inp + 1)) + cpu->flags & C) >> 8;
-            cpu->acc = (uint16_t)(cpu->acc) + get(abs(inp + 1)) + cpu->flags & C;
+            p.as_8 = (uint16_t)(cpu->acc) + get(absm(inp + 1)) + cpu->flags & C;
+            cpu->acc = p.as_8;
+			cary(p.as_8 >> 7);
             zero(cpu->acc);
             nega(cpu->acc);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
             inp += 3;
             break;
 
             // ROR
         case 0x6E:
-            p.as_8 = get(abs(inp + 1)) & 1;
-            mem[abs(inp + 1)] = mem[abs(inp + 1)] >> 1 | (cpu->flags << 7);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
+            p.as_8 = get(absm(inp + 1));
+            mem[absm(inp + 1)] = p.as_8 >> 1 | (cpu->flags << 7);
+			cary(p.as_8 & 1);
             zero(cpu->acc);
             nega(cpu->acc);
             inp += 3;
@@ -571,28 +594,28 @@ int run(machine_t *comp) {
 
             // ADC
         case 0x71:
-            p.as_8 = ((uint16_t)(cpu->acc) + get(indy(inp + 1)) + cpu->flags & C) >> 8;
-            cpu->acc = (uint16_t)(cpu->acc) + get(indy(inp + 1)) + cpu->flags & C;
+            p.as_8 = (uint16_t)(cpu->acc) + get(indy(inp + 1)) + cpu->flags & C;
+            cpu->acc = p.as_8;
+			cary(p.as_8 >> 7);
             zero(cpu->acc);
             nega(cpu->acc);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
             inp += 2;
             break;
 
         case 0x75:
-            p.as_8 = ((uint16_t)(cpu->acc) + get(zpgx(inp + 1)) + cpu->flags & C) >> 8;
-            cpu->acc = (uint16_t)(cpu->acc) + get(zpgx(inp + 1)) + cpu->flags & C;
+			p.as_8 = (uint16_t)(cpu->acc) + get(zpgx(inp + 1)) + cpu->flags & C;
+			cpu->acc = p.as_8;
+			cary(p.as_8 >> 7);
             zero(cpu->acc);
             nega(cpu->acc);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
             inp += 2;
             break;
 
             // ROR
         case 0x76:
-            p.as_8 = get(zpgx(inp + 1)) & 1;
-            mem[zpgx(inp + 1)] = mem[zpgx(inp + 1)] >> 1 | (cpu->flags << 7);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
+            p.as_8 = get(zpgx(inp + 1));
+            mem[zpgx(inp + 1)] = p.as_8 >> 1 | (cpu->flags << 7);
+			cary(p.as_8 & 1);
             zero(cpu->acc);
             nega(cpu->acc);
             inp += 2;
@@ -606,28 +629,28 @@ int run(machine_t *comp) {
 
             // ADC
         case 0x79:
-            p.as_8 = ((uint16_t)(cpu->acc) + get(absy(inp + 1)) + cpu->flags & C) >> 8;
-            cpu->acc = (uint16_t)(cpu->acc) + get(absy(inp + 1)) + cpu->flags & C;
+            p.as_8 = (uint16_t)(cpu->acc) + get(absy(inp + 1)) + cpu->flags & C;
+            cpu->acc = p.as_8;
+			cary(p.as_8 >> 7);
             zero(cpu->acc);
             nega(cpu->acc);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
             inp += 3;
             break;
 
         case 0x7D:
-            p.as_8 = ((uint16_t)(cpu->acc) + get(absx(inp + 1)) + cpu->flags & C) >> 8;
-            cpu->acc = (uint16_t)(cpu->acc) + get(absx(inp + 1)) + cpu->flags & C;
+            p.as_8 = (uint16_t)(cpu->acc) + get(absx(inp + 1)) + cpu->flags & C;
+            cpu->acc = p.as_8;
+			cary(p.as_8 >> 7);
             zero(cpu->acc);
             nega(cpu->acc);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
             inp += 3;
             break;
 
             // ROR
         case 0x7E:
-            p.as_8 = get(absx(inp + 1)) & 1;
-            mem[absx(inp + 1)] = mem[absx(inp + 1)] >> 1 | (cpu->flags << 7);
-            p.as_8 ? cpu->flags |= C : cpu->flags &= ~C;
+            p.as_8 = get(absx(inp + 1));
+            mem[absx(inp + 1)] = p.as_8 >> 1 | (cpu->flags << 7);
+			cary(p.as_8 & 1);
             zero(cpu->acc);
             nega(cpu->acc);
             inp += 3;
@@ -675,19 +698,19 @@ int run(machine_t *comp) {
 
 			// STY
         case 0x8C:
-			mem[abs(inp + 1)] = cpu->Y;
+			mem[absm(inp + 1)] = cpu->Y;
 			inp += 3;
             break;
 
 			// STA
         case 0x8D:
-			mem[abs(inp + 1)] = cpu->acc;
+			mem[absm(inp + 1)] = cpu->acc;
 			inp += 3;
             break;
 
 			// STX
         case 0x8E:
-			mem[abs(inp + 1)] = cpu->X;
+			mem[absm(inp + 1)] = cpu->X;
 			inp += 3;
             break;
 
@@ -820,7 +843,7 @@ int run(machine_t *comp) {
 
 			// LDY
         case 0xAC:
-			cpu->Y = get(abs(inp + 1));
+			cpu->Y = get(absm(inp + 1));
 			nega(cpu->Y);
 			zero(cpu->Y);
 			inp += 3;
@@ -828,7 +851,7 @@ int run(machine_t *comp) {
 
 			// LDA
         case 0xAD:
-			cpu->acc = get(abs(inp + 1));
+			cpu->acc = get(absm(inp + 1));
 			nega(cpu->acc);
 			zero(cpu->acc);
 			inp += 3;
@@ -836,7 +859,7 @@ int run(machine_t *comp) {
 
 			// LDX
         case 0xAE:
-			cpu->X = get(abs(inp + 1));
+			cpu->X = get(absm(inp + 1));
 			nega(cpu->X);
 			zero(cpu->X);
 			inp += 3;
@@ -925,8 +948,8 @@ int run(machine_t *comp) {
 
 			// CPY
         case 0xC0:
-			p.as_16 = cpu->Y - read(inp + 1);
-			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			p.as_16 = (int16_t)cpu->Y - (int16_t)read(inp + 1);
+			cary(p.as_16 >> 8);
 			zero(p.as_8);
 			nega(p.as_8 & 0x80);
 			inp += 2;
@@ -934,8 +957,8 @@ int run(machine_t *comp) {
 
 			// CMP
         case 0xC1:
-			p.as_16 = cpu->acc - get(indx(inp + 1));
-			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			p.as_16 = (int16_t)cpu->acc - (int16_t)get(indx(inp + 1));
+			cary(p.as_16 >> 8);
 			zero(p.as_8);
 			nega(p.as_8 & 0x80);
 			inp += 2;
@@ -943,8 +966,8 @@ int run(machine_t *comp) {
 
 			// CPY
         case 0xC4:
-			p.as_16 = cpu->Y - get(zpg(inp + 1));
-			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			p.as_16 = (int16_t)cpu->Y - (int16_t)get(zpg(inp + 1));
+			cary(p.as_16 >> 8);
 			zero(p.as_8);
 			nega(p.as_8 & 0x80);
 			inp += 2;
@@ -952,8 +975,8 @@ int run(machine_t *comp) {
 
 			// CMP
         case 0xC5:
-			p.as_16 = cpu->acc - get(zpg(inp + 1));
-			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			p.as_16 = (int16_t)cpu->acc - (int16_t)get(zpg(inp + 1));
+			cary(p.as_16 >> 8);
 			zero(p.as_8);
 			nega(p.as_8 & 0x80);
 			inp += 2;
@@ -978,8 +1001,8 @@ int run(machine_t *comp) {
 
 			// CMP
         case 0xC9:
-			p.as_16 = cpu->acc - read(inp + 1);
-			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			p.as_16 = (int16_t)cpu->acc - (int16_t)read(inp + 1);
+			cary(p.as_16 >> 8);
 			zero(p.as_8);
 			nega(p.as_8 & 0x80);
 			inp += 2;
@@ -995,8 +1018,8 @@ int run(machine_t *comp) {
 
 			// CPY
         case 0xCC:
-			p.as_16 = cpu->Y - get(abs(inp + 1));
-			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			p.as_16 = (int16_t)cpu->Y - (int16_t)get(absm(inp + 1));
+			cary(p.as_16 >> 8);
 			zero(p.as_8);
 			nega(p.as_8 & 0x80);
 			inp += 3;
@@ -1004,8 +1027,8 @@ int run(machine_t *comp) {
 
 			// CMP
         case 0xCD:
-			p.as_16 = cpu->acc - get(abs(inp + 1));
-			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			p.as_16 = (int16_t)cpu->acc - (int16_t)get(absm(inp + 1));
+			cary(p.as_16 >> 8);
 			zero(p.as_8);
 			nega(p.as_8 & 0x80);
 			inp += 3;
@@ -1013,10 +1036,10 @@ int run(machine_t *comp) {
 
 			// DEC
         case 0xCE:
-			p.as_8 = get(abs(inp + 1)) - 1;
+			p.as_8 = get(absm(inp + 1)) - 1;
 			nega(p.as_8);
 			zero(p.as_8);
-			mem[abs(inp + 1)] = p.as_8;
+			mem[absm(inp + 1)] = p.as_8;
 			inp += 3;
             break;
 
@@ -1027,16 +1050,16 @@ int run(machine_t *comp) {
 
 			// CMP
         case 0xD1:
-			p.as_16 = cpu->acc - get(indy(inp + 1));
-			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			p.as_16 = (int16_t)cpu->acc - (int16_t)get(indy(inp + 1));
+			cary(p.as_16 >> 8);
 			zero(p.as_8);
 			nega(p.as_8 & 0x80);
 			inp += 2;
             break;
 
         case 0xD5:
-			p.as_16 = cpu->acc - get(zpgx(inp + 1));
-			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			p.as_16 = (int16_t)cpu->acc - (int16_t)get(zpgx(inp + 1));
+			cary(p.as_16 >> 8);
 			zero(p.as_8);
 			nega(p.as_8 & 0x80);
 			inp += 2;
@@ -1059,16 +1082,16 @@ int run(machine_t *comp) {
 
 			// CMP
         case 0xD9:
-			p.as_16 = cpu->acc - get(absy(inp + 1));
-			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			p.as_16 = (int16_t)cpu->acc - (int16_t)get(absy(inp + 1));
+			cary(p.as_16 >> 8);
 			zero(p.as_8);
 			nega(p.as_8 & 0x80);
 			inp += 3;
             break;
 
         case 0xDD:
-			p.as_16 = cpu->acc - get(absx(inp + 1));
-			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			p.as_16 = (int16_t)cpu->acc - (int16_t)get(absx(inp + 1));
+			cary(p.as_16 >> 8);
 			zero(p.as_8);
 			nega(p.as_8 & 0x80);
 			inp += 3;
@@ -1085,8 +1108,8 @@ int run(machine_t *comp) {
 
 			// CPX
         case 0xE0:
-			p.as_16 = cpu->X - read(inp + 1);
-			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			p.as_16 = (int16_t)cpu->X - (int16_t)read(inp + 1);
+			cary(p.as_16 >> 8);
 			zero(p.as_8);
 			nega(p.as_8 & 0x80);
 			inp += 2;
@@ -1095,10 +1118,10 @@ int run(machine_t *comp) {
 			// SBC
         case 0xE1:
 		 	p.as_8 = get(indx(inp + 1));
-			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+			p.as_16 = (int16_t)(cpu->acc) - (int16_t)(p.as_16) - (int16_t)(cpu->flags & C);
 			nega(p.as_8);
 			zero(p.as_8);
-		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(indx(inp + 1))) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    ovrf(((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(indx(inp + 1))) & 0x80));
 		    if (cpu->flags & D)
 		    {
 		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < (get(indx(inp + 1)) & 0x0F)) p.as_16 -= 6;
@@ -1107,15 +1130,15 @@ int run(machine_t *comp) {
 		        	p.as_16 -= 0x60;
 		        }
 		    }
-		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+		    cary(p.as_16 >= 0x100);
 			cpu->acc = p.as_8;
 			inp += 2;
             break;
 
 			// CPX
         case 0xE4:
-			p.as_16 = cpu->X - get(zpg(inp + 1));
-			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			p.as_16 = (int16_t)cpu->X - (int16_t)get(zpg(inp + 1));
+			cary(p.as_16 >> 8);
 			zero(p.as_8);
 			nega(p.as_8 & 0x80);
 			inp += 2;
@@ -1124,10 +1147,10 @@ int run(machine_t *comp) {
 			// SBC
         case 0xE5:
 		 	p.as_8 = get(zpg(inp + 1));
-			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+			p.as_16 = (int16_t)(cpu->acc) - (int16_t)(p.as_16) - (int16_t)(cpu->flags & C);
 			nega(p.as_8);
 			zero(p.as_8);
-		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(zpg(inp + 1))) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    ovrf(((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(zpg(inp + 1))) & 0x80));
 		    if (cpu->flags & D)
 		    {
 		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < (get(zpg(inp + 1)) & 0x0F)) p.as_16 -= 6;
@@ -1136,7 +1159,7 @@ int run(machine_t *comp) {
 		        	p.as_16 -= 0x60;
 		        }
 		    }
-		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+		    cary(p.as_16 >= 0x100);
 			cpu->acc = p.as_8;
 			inp += 2;
             break;
@@ -1160,19 +1183,19 @@ int run(machine_t *comp) {
 			// SBC
         case 0xE9:
 		 	p.as_8 = read(inp + 1);
-			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+			p.as_16 = (int16_t)(cpu->acc) - (int16_t)(p.as_16) - (int16_t)(cpu->flags & C);
 			nega(p.as_8);
 			zero(p.as_8);
-		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ read(inp + 1)) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    ovrf(((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ read(inp + 1)) & 0x80));
 		    if (cpu->flags & D)
 		    {
-		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < read(inp + 1) & 0x0F)) p.as_16 -= 6;
+		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < (read(inp + 1) & 0x0F)) p.as_16 -= 6;
 		        if (p.as_16 > 0x99)
 		        {
 		        	p.as_16 -= 0x60;
 		        }
 		    }
-		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+		    cary(p.as_16 >= 0x100);
 			cpu->acc = p.as_8;
 			inp += 2;
             break;
@@ -1184,8 +1207,8 @@ int run(machine_t *comp) {
 
 			// CPX
         case 0xEC:
-			p.as_16 = cpu->X - get(abs(inp + 1));
-			p.as_16 >> 8 ? cpu->flags |= C : cpu->flags &= ~C;
+			p.as_16 = (int16_t)cpu->X - (int16_t)get(abs(inp + 1));
+			cary(p.as_16 >> 8);
 			zero(p.as_8);
 			nega(p.as_8 & 0x80);
 			inp += 3;
@@ -1193,27 +1216,27 @@ int run(machine_t *comp) {
 
 			// SBC
         case 0xED:
-		 	p.as_8 = get(abs(inp + 1));
-			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+		 	p.as_8 = get(absm(inp + 1));
+			p.as_16 = (int16_t)(cpu->acc) - (int16_t)(p.as_16) - (int16_t)(cpu->flags & C);
 			nega(p.as_8);
 			zero(p.as_8);
-		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(abs(inp + 1))) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    ovrf(((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(absm(inp + 1))) & 0x80));
 		    if (cpu->flags & D)
 		    {
-		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < get(abs(inp + 1)) & 0x0F)) p.as_16 -= 6;
+		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < (get(absm(inp + 1)) & 0x0F)) p.as_16 -= 6;
 		        if (p.as_16 > 0x99)
 		        {
 		        	p.as_16 -= 0x60;
 		        }
 		    }
-		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+		    cary(p.as_16 >= 0x100);
 			cpu->acc = p.as_8;
 			inp += 3;
             break;
 
 			// INC
         case 0xEE:
-			p.as_8 = ++mem[abs(inp + 1)];
+			p.as_8 = ++mem[absm(inp + 1)];
 			zero(p.as_8);
 			nega(p.as_8);
 			inp += 3;
@@ -1227,19 +1250,19 @@ int run(machine_t *comp) {
 			// SBC
 		case 0xF1:
 		 	p.as_8 = get(indy(inp + 1));
-			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+			p.as_16 = (int16_t)(cpu->acc) - (int16_t)(p.as_16) - (int16_t)(cpu->flags & C);
 			nega(p.as_8);
 			zero(p.as_8);
-		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(indy(inp + 1))) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    ovrf(((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(indy(inp + 1))) & 0x80));
 		    if (cpu->flags & D)
 		    {
-		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < get(indy(inp + 1)) & 0x0F)) p.as_16 -= 6;
+		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < (get(indy(inp + 1)) & 0x0F)) p.as_16 -= 6;
 		        if (p.as_16 > 0x99)
 		        {
 		        	p.as_16 -= 0x60;
 		        }
 		    }
-		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+		    cary(p.as_16 >= 0x100);
 			cpu->acc = p.as_8;
 			inp += 2;
             break;
@@ -1247,19 +1270,19 @@ int run(machine_t *comp) {
 			// SBC
         case 0xF5:
 		 	p.as_8 = get(zpgx(inp + 1));
-			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+			p.as_16 = (int16_t)(cpu->acc) - (int16_t)(p.as_16) - (int16_t)(cpu->flags & C);
 			nega(p.as_8);
 			zero(p.as_8);
-		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(zpgx(inp + 1))) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    ovrf(((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(zpgx(inp + 1))) & 0x80));
 		    if (cpu->flags & D)
 		    {
-		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < get(zpgx(inp + 1)) & 0x0F)) p.as_16 -= 6;
+		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < (get(zpgx(inp + 1)) & 0x0F)) p.as_16 -= 6;
 		        if (p.as_16 > 0x99)
 		        {
 		        	p.as_16 -= 0x60;
 		        }
 		    }
-		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+		    cary(p.as_16 >= 0x100);
 			cpu->acc = p.as_8;
 			inp += 2;
             break;
@@ -1281,19 +1304,19 @@ int run(machine_t *comp) {
 			// SBC
         case 0xF9:
 		 	p.as_8 = get(absy(inp + 1));
-			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
+			p.as_16 = (int16_t)(cpu->acc) - (int16_t)(p.as_16) - (int16_t)(cpu->flags & C);
 			nega(p.as_8);
 			zero(p.as_8);
-		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(absy(inp + 1))) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    ovrf(((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(absy(inp + 1))) & 0x80));
 		    if (cpu->flags & D)
 		    {
-		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < get(absy(inp + 1)) & 0x0F)) p.as_16 -= 6;
+		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < (get(absy(inp + 1)) & 0x0F)) p.as_16 -= 6;
 		        if (p.as_16 > 0x99)
 		        {
 		        	p.as_16 -= 0x60;
 		        }
 		    }
-		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+		    cary(p.as_16 >= 0x100);
 			cpu->acc = p.as_8;
 			inp += 3;
             break;
@@ -1303,16 +1326,16 @@ int run(machine_t *comp) {
 			p.as_16 = cpu->acc - p.as_8 - (cpu->flags & C);
 			nega(p.as_8);
 			zero(p.as_8);
-		    ((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(absx(inp + 1))) & 0x80) ? cpu->flags |= V : cpu->flags &= ~V;
+		    ovrf(((cpu->acc ^ p.as_8) & 0x80) && ((cpu->acc ^ get(absx(inp + 1))) & 0x80));
 		    if (cpu->flags & D)
 		    {
-		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < get(absx(inp + 1)) & 0x0F)) p.as_16 -= 6;
+		    	if ( ((cpu->acc & 0x0F) - (cpu->flags & C)) < (get(absx(inp + 1)) & 0x0F)) p.as_16 -= 6;
 		        if (p.as_16 > 0x99)
 		        {
 		        	p.as_16 -= 0x60;
 		        }
 		    }
-		    p.as_16 < 0x100 ? cpu->flags &= ~C : cpu->flags |= C;
+		    cary(p.as_16 >= 0x100);
 			cpu->acc = p.as_8;
 			inp += 3;
             break;
