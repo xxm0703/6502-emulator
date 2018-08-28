@@ -4,50 +4,6 @@
 
 machine_t mach;
 
-extern uint8_t inline read(uint16_t pc){
-	return mach.ins[pc];
-}
-extern uint16_t inline rel(uint8_t inp){
-	return inp + read(inp + 1);
-}
-extern uint16_t inline norm(uint8_t *src, uint16_t inx){
-	return src[inx] | src[inx + 1] << 8;
-}
-extern uint8_t inline get(uint16_t abs){
-	return mach.mem[abs];
-}
-
-extern uint16_t inline ind(uint8_t add){
-	return norm(mach.mem, norm(mach.ins, add));
-}
-
-extern uint16_t inline indx(uint8_t zpg){
-	return norm(mach.mem, read(zpg) + mach.cpu->X);
-}
-extern uint16_t inline indy(uint8_t zpg){
-	return norm(mach.mem, read(zpg)) + mach.cpu->Y;
-}
-
-extern uint16_t inline zpg(uint8_t zpg){
-	return read(zpg);
-}
-extern uint16_t inline zpgx(uint8_t add){
-	return zpg(add) + mach.cpu->X;
-}
-extern uint16_t inline zpgy(uint8_t add){
-	return zpg(add) + mach.cpu->Y;
-}
-
-extern uint16_t inline absm(uint8_t abs){
-	return norm(mach.ins, abs);
-}
-extern uint16_t inline absx(uint8_t abs){
-	return absm(abs) + mach.cpu->X;
-}
-extern uint16_t inline absy(uint8_t abs){
-	return absm(abs) + mach.cpu->Y;
-}
-
 void setup_machine(machine_t *m){
 	m->mem = (uint8_t *) malloc(64 * 1024 * sizeof(uint8_t));
     m->ins = (uint8_t *) malloc(64 * 1024 * sizeof(uint8_t));
