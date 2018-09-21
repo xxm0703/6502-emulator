@@ -2,6 +2,10 @@
 #include <stdio.h>
 
 int main(int argc, char const *argv[]) {
-	printf("%s\n", argv[argc-1]);
+	FILE *f = fopen(argv[argc-1], "r");
+	char c;
+	fread(mach.ins, 1, 65, f);
+	printf("%s", mach.ins);
+	// mach.inst =
 	return 0;
 }

@@ -56,6 +56,8 @@ void setup_machine(machine_t *m){
 	m->mem = (uint8_t *) malloc(64 * 1024 * sizeof(uint8_t));
     m->ins = (uint8_t *) malloc(64 * 1024 * sizeof(uint8_t));
     m->cpu = (cpu_t *) malloc(sizeof(cpu_t));
+	m->cpu->PC = 0;
+	m->cpu->SP = 0xFF;
 }
 
 int run(machine_t *comp) {
@@ -66,7 +68,8 @@ int run(machine_t *comp) {
 		uint16_t as_16;
 		uint8_t as_8;
 	} p;
-    for (;;) {
+
+	for (;;) {
 
         switch (read(inp)) {
 
