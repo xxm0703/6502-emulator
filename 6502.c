@@ -1,9 +1,4 @@
 #include "6502.h"
-#include <stdlib.h>
-
-
-machine_t mach;
-
 
 extern uint8_t inline bcd(uint8_t value){
 	return 10 * (value >> 4) + (0x0F & value);
@@ -58,6 +53,7 @@ void setup_machine(machine_t *m){
     m->cpu = (cpu_t *) malloc(sizeof(cpu_t));
 	m->cpu->PC = 0;
 	m->cpu->SP = 0xFF;
+	m->cpu->flags = 0;
 }
 
 int run(machine_t *comp) {
@@ -69,8 +65,7 @@ int run(machine_t *comp) {
 		uint8_t as_8;
 	} p;
 
-	for (;;) {
-
+	while (~cpu->flags & I && read(inp) != EOF) {
         switch (read(inp)) {
 
             // BRK

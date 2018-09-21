@@ -1,11 +1,10 @@
 #include "6502.h"
-#include <stdio.h>
 
 int main(int argc, char const *argv[]) {
 	FILE *f = fopen(argv[argc-1], "r");
-	char c;
-	fread(mach.ins, 1, 65, f);
+	setup_machine(&mach);
+	fread(mach.ins, 1, 10000, f);
 	printf("%s", mach.ins);
-	// mach.inst =
+	run(&mach);
 	return 0;
 }
