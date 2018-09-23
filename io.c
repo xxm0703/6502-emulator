@@ -4,7 +4,7 @@ int main(int argc, char const *argv[]) {
 	FILE *f = fopen(argv[argc-1], "r");
 	setup_machine(&mach);
 	fread(mach.ins, 1, 10000, f);
-	printf("%s", mach.ins);
 	run(&mach);
+	printf("%s", mach.mem);
 	return 0;
 }

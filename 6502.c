@@ -70,10 +70,10 @@ int run(machine_t *comp) {
 
             // BRK
         case 0x0:
-			cpu->flags |= I;
-            mem[1 << 8 | cpu->SP--] = (inp + 2) >> 8;
-			mem[1 << 8 | cpu->SP--] = (inp + 2) & 0xFF;
-            mem[1 << 8 | cpu->SP--] = cpu->flags;
+		cpu->flags |= I;
+        	mem[1 << 8 | cpu->SP--] = (inp + 2) >> 8;
+		mem[1 << 8 | cpu->SP--] = (inp + 2) & 0xFF;
+            	mem[1 << 8 | cpu->SP--] = cpu->flags;
             break;
 
             // ORA
@@ -1334,4 +1334,7 @@ int run(machine_t *comp) {
         }
 
     }
+	free(comp->mem);
+	free(comp->ins);
+	free(comp->cpu);
 }
