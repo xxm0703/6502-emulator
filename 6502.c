@@ -64,7 +64,7 @@ int run(machine_t *comp) {
 		uint16_t as_16;
 		uint8_t as_8;
 	} p;
-
+	srand(time(0));
 	while (~cpu->flags & I && read(inp) != EOF) {
         switch (read(inp)) {
 
@@ -1332,9 +1332,10 @@ int run(machine_t *comp) {
 			inp += 3;
             break;
         }
-
+		mem[0xFE] = rand() % 256;
+		srand(rand());
     }
-	free(comp->mem);
-	free(comp->ins);
-	free(comp->cpu);
+	// free(comp->mem);
+	// free(comp->ins);
+	// free(comp->cpu);
 }

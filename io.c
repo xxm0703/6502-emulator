@@ -5,6 +5,6 @@ int main(int argc, char const *argv[]) {
 	setup_machine(&mach);
 	fread(mach.ins, 1, 10000, f);
 	run(&mach);
-	printf("%s", mach.mem);
+	printf("%d", (uint8_t)mach.mem[0xFE]);
 	return 0;
 }
