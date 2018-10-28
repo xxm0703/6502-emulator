@@ -56,8 +56,8 @@ void setup_machine(machine_t *m){
 	m->cpu->flags = 0;
 }
 
-int run(machine_t *comp) {
-    int8_t *mem = comp->mem;
+void run(machine_t *comp) {
+    uint8_t *mem = comp->mem;
     cpu_t *cpu = comp->cpu;
     uint16_t inp = cpu->PC;
 	union{
@@ -65,7 +65,7 @@ int run(machine_t *comp) {
 		uint8_t as_8;
 	} p;
 	srand(time(0));
-	while (~cpu->flags & I && read(inp) != EOF) {
+	while (~cpu->flags & I) {
         switch (read(inp)) {
 
             // BRK
@@ -364,7 +364,7 @@ int run(machine_t *comp) {
             // RTI
         case 0x40:
             cpu->flags = get(1 << 8 | cpu->SP++);
-            inp = get(1 << 8 | cpu->SP + 1) | get(1 << 8 | cpu->SP + 2) << 8;
+            inp = get(1 << 8 | (cpu->SP + 1)) | get(1 << 8 | (cpu->SP + 2)) << 8;
 			cpu->SP += 2;
             inp++;
             break;
@@ -501,14 +501,14 @@ int run(machine_t *comp) {
 
             // RTS
         case 0x60:
-            inp = get(1 << 8 | cpu->SP + 1) | get(1 << 8 | cpu->SP + 2) << 8;
+            inp = get(1 << 8 | (cpu->SP + 1)) | get(1 << 8 | (cpu->SP + 2)) << 8;
 			cpu->SP += 2;
 			inp++;
             break;
 
             // ADC
         case 0x61:
-            p.as_8 = (uint16_t)(cpu->acc) + get(indx(inp + 1)) + cpu->flags & C;
+            p.as_8 = (uint16_t)(cpu->acc) + get(indx(inp + 1)) + (cpu->flags & C);
             cpu->acc = p.as_8;
 			cary(p.as_8 >> 7);
             zero(cpu->acc);
@@ -517,7 +517,7 @@ int run(machine_t *comp) {
             break;
 
         case 0x65:
-            p.as_8 = (uint16_t)(cpu->acc) + get(zpg(inp + 1)) + cpu->flags & C;
+            p.as_8 = (uint16_t)(cpu->acc) + get(zpg(inp + 1)) + (cpu->flags & C);
             cpu->acc = p.as_8;
 			cary(p.as_8 >> 7);
             zero(cpu->acc);
@@ -545,7 +545,7 @@ int run(machine_t *comp) {
 
         	// ADC
         case 0x69:
-            p.as_8 = (uint16_t)(cpu->acc) + read(inp + 1) + cpu->flags & C;
+            p.as_8 = (uint16_t)(cpu->acc) + read(inp + 1) + (cpu->flags & C);
             cpu->acc = p.as_8;
 			cary(p.as_8 >> 7);
             zero(cpu->acc);
@@ -571,7 +571,7 @@ int run(machine_t *comp) {
 
             // ADC
         case 0x6D:
-            p.as_8 = (uint16_t)(cpu->acc) + get(absm(inp + 1)) + cpu->flags & C;
+            p.as_8 = (uint16_t)(cpu->acc) + get(absm(inp + 1)) + (cpu->flags & C);
             cpu->acc = p.as_8;
 			cary(p.as_8 >> 7);
             zero(cpu->acc);
@@ -596,7 +596,7 @@ int run(machine_t *comp) {
 
             // ADC
         case 0x71:
-            p.as_8 = (uint16_t)(cpu->acc) + get(indy(inp + 1)) + cpu->flags & C;
+            p.as_8 = (uint16_t)(cpu->acc) + get(indy(inp + 1)) + (cpu->flags & C);
             cpu->acc = p.as_8;
 			cary(p.as_8 >> 7);
             zero(cpu->acc);
@@ -605,7 +605,7 @@ int run(machine_t *comp) {
             break;
 
         case 0x75:
-			p.as_8 = (uint16_t)(cpu->acc) + get(zpgx(inp + 1)) + cpu->flags & C;
+			p.as_8 = (uint16_t)(cpu->acc) + get(zpgx(inp + 1)) + (cpu->flags & C);
 			cpu->acc = p.as_8;
 			cary(p.as_8 >> 7);
             zero(cpu->acc);
@@ -631,7 +631,7 @@ int run(machine_t *comp) {
 
             // ADC
         case 0x79:
-            p.as_8 = (uint16_t)(cpu->acc) + get(absy(inp + 1)) + cpu->flags & C;
+            p.as_8 = (uint16_t)(cpu->acc) + get(absy(inp + 1)) + (cpu->flags & C);
             cpu->acc = p.as_8;
 			cary(p.as_8 >> 7);
             zero(cpu->acc);
@@ -640,7 +640,7 @@ int run(machine_t *comp) {
             break;
 
         case 0x7D:
-            p.as_8 = (uint16_t)(cpu->acc) + get(absx(inp + 1)) + cpu->flags & C;
+            p.as_8 = (uint16_t)(cpu->acc) + get(absx(inp + 1)) + (cpu->flags & C);
             cpu->acc = p.as_8;
 			cary(p.as_8 >> 7);
             zero(cpu->acc);

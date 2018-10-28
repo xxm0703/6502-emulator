@@ -27,12 +27,12 @@ typedef struct {
 
 typedef struct {
         cpu_t *cpu;
-        int8_t *mem, *ins;
+        uint8_t *mem, *ins;
 } machine_t;
 
 machine_t mach;
 
 void setup_machine(machine_t *);
-int run(machine_t *);
+void run(machine_t *);
 
 #endif
